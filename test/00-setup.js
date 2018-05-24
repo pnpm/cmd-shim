@@ -1,34 +1,32 @@
-var test = require('tap').test
-var mkdirp = require('mkdirp')
-var fs = require('fs')
-var path = require('path')
-var fixtures = path.resolve(__dirname, 'fixtures')
+'use strict'
+const tape = require('tape')
+const promisifyTape = require('tape-promise').default
+const test = promisifyTape(tape)
+const mkdirp = require('mkdirp-promise')
+const fs = require('fs')
+const path = require('path')
+const fixtures = path.resolve(__dirname, 'fixtures')
 
-var froms = {
-  'from.exe': 'exe',
-  'from.env': '#!/usr/bin/env node\nconsole.log(/hi/)\n',
-  'from.env.args': '#!/usr/bin/env node --expose_gc\ngc()\n',
-  'from.sh': '#!/usr/bin/sh\necho hi\n',
-  'from.sh.args': '#!/usr/bin/sh -x\necho hi\n'
+const srcs = {
+  'src.exe': 'exe',
+  'src.env': '#!/usr/bin/env node\nconsole.log(/hi/)\n',
+  'src.env.args': '#!/usr/bin/env node --expose_gc\ngc()\n',
+  'src.sh': '#!/usr/bin/sh\necho hi\n',
+  'src.sh.args': '#!/usr/bin/sh -x\necho hi\n'
 }
 
-var cmdShim = require('../')
-
 test('create fixture', function (t) {
-  mkdirp(fixtures, function (er) {
-    if (er)
-      throw er
-    t.pass('made dir')
-    Object.keys(froms).forEach(function (f) {
-      t.test('write ' + f, function (t) {
-        fs.writeFile(path.resolve(fixtures, f), froms[f], function (er) {
-          if (er)
-            throw er
-          t.pass('wrote ' + f)
-          t.end()
+  return mkdirp(fixtures)
+    .then(() => {
+      t.pass('made dir')
+      Object.keys(srcs).forEach(function (f) {
+        t.test('write ' + f, function (t) {
+          fs.writeFile(path.resolve(fixtures, f), srcs[f], function (er) {
+            if (er) { throw er }
+            t.pass('wrote ' + f)
+            t.end()
+          })
         })
       })
     })
-    t.end()
-  })
 })
