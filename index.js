@@ -42,8 +42,12 @@ function cmdShim (src, to, opts) {
 }
 
 function cmdShim_ (src, to, opts) {
-  return Promise.all([rm(to), opts.createCmdFile && rm(`${to}.cmd`)])
-    .then(() => writeShim(src, to, opts))
+  return Promise.all([
+    rm(to),
+    rm(`${to}.ps1`),
+    opts.createCmdFile && rm(`${to}.cmd`)
+  ])
+  .then(() => writeShim(src, to, opts))
 }
 
 function writeShim (src, to, opts) {
@@ -70,6 +74,8 @@ function writeShim (src, to, opts) {
 
 function writeShim_ (src, to, opts) {
   opts = opts || {}
+  // Create PowerShell file by default if the option hasn't been specified
+  opts.createPwshFile = (typeof opts.createPwshFile !== 'undefined' ? opts.createPwshFile : true)
   let shTarget = path.relative(path.dirname(to), src)
   let target = shTarget.split('/').join('\\')
   let longProg
@@ -205,16 +211,16 @@ function writeShim_ (src, to, opts) {
 
   return Promise.all([
     opts.createCmdFile && fs.writeFile(to + '.cmd', cmd, 'utf8'),
-    fs.writeFile(`${to}.ps1`, pwsh, 'utf8'),
+    opts.createPwshFile && fs.writeFile(`${to}.ps1`, pwsh, 'utf8'),
     fs.writeFile(to, sh, 'utf8')
   ])
-  .then(() => chmodShim(to, opts.createCmdFile))
+  .then(() => chmodShim(to, opts))
 }
 
-function chmodShim (to, createCmdFile) {
+function chmodShim (to, {createCmdFile, createPwshFile}) {
   return Promise.all([
     fs.chmod(to, 0o755),
-    fs.chmod(`${to}.ps1`, 0o755),
+    createPwshFile && fs.chmod(`${to}.ps1`, 0o755),
     createCmdFile && fs.chmod(`${to}.cmd`, 0o755)
   ])
 }
