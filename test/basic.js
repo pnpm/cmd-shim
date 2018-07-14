@@ -135,7 +135,7 @@ test('env shebang', function (t) {
 test('env shebang with NODE_PATH', function (t) {
   const src = path.resolve(fixtures, 'src.env')
   const to = path.resolve(fixtures, 'env.shim')
-  return cmdShim(src, to, {nodePath: '/john/src/node_modules', createCmdFile: true})
+  return cmdShim(src, to, {nodePath: ['/john/src/node_modules', '/bin/node/node_modules'], createCmdFile: true})
     .then(() => {
       console.error('%j', fs.readFileSync(to, 'utf8'))
       console.error('%j', fs.readFileSync(to + '.cmd', 'utf8'))
@@ -150,16 +150,16 @@ test('env shebang with NODE_PATH', function (t) {
         '\nesac' +
         '\n' +
         '\nif [ -x "$basedir/node" ]; then' +
-        '\n  NODE_PATH="/john/src/node_modules" "$basedir/node"  "$basedir/src.env" "$@"' +
+        '\n  NODE_PATH="/john/src/node_modules:/bin/node/node_modules" "$basedir/node"  "$basedir/src.env" "$@"' +
         '\n  ret=$?' +
         '\nelse ' +
-        '\n  NODE_PATH="/john/src/node_modules" node  "$basedir/src.env" "$@"' +
+        '\n  NODE_PATH="/john/src/node_modules:/bin/node/node_modules" node  "$basedir/src.env" "$@"' +
         '\n  ret=$?' +
         '\nfi' +
         '\nexit $ret' +
         '\n')
       t.equal(fs.readFileSync(to + '.cmd', 'utf8'),
-        '@SET NODE_PATH=/john/src/node_modules\r' +
+        '@SET NODE_PATH=\\john\\src\\node_modules;\\bin\\node\\node_modules\r' +
         '\n@IF EXIST "%~dp0\\node.exe" (\r' +
         '\n  "%~dp0\\node.exe"  "%~dp0\\src.env" %*\r' +
         '\n) ELSE (\r' +
@@ -173,13 +173,13 @@ test('env shebang with NODE_PATH', function (t) {
         '\n' +
         '\n$exe=""' +
         '\n$env_node_path=$env:NODE_PATH' +
-        '\n$env:NODE_PATH="\\john\\src\\node_modules"' +
+        '\n$env:NODE_PATH="\\john\\src\\node_modules;\\bin\\node\\node_modules"' +
         '\nif ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {' +
         '\n  # Fix case when both the Windows and Linux builds of Node' +
         '\n  # are installed in the same directory' +
         '\n  $exe=".exe"' +
         '\n} else {' +
-        '\n  $env:NODE_PATH="/john/src/node_modules"' +
+        '\n  $env:NODE_PATH="/john/src/node_modules:/bin/node/node_modules"' +
         '\n}' +
         '\n$ret=0' +
         '\nif (Test-Path "$basedir/node$exe") {' +
