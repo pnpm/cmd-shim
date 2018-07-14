@@ -188,16 +188,16 @@ function writeShim_ (src, to, opts) {
     '\n' +
     '$exe=""\n' +
     (opts.nodePath ? '$env_node_path=$env:NODE_PATH\n' +
-      `$env:NODE_PATH="${isWindows() ? opts.nodePath : String(opts.nodePath).replace(':', ';')}"\n` : '') +
+      `$env:NODE_PATH="${opts.nodePath.replace(/:/g, ';').replace(/\//g, '\\')}"\n` : '') +
     'if ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {\n' +
     '  # Fix case when both the Windows and Linux builds of Node\n' +
     '  # are installed in the same directory\n' +
     '  $exe=".exe"\n' +
     '}'
-  if (opts.nodePath && (String(opts.nodePath).includes(';') || String(opts.nodePath).includes(':'))) {
+  if (opts.nodePath) {
     pwsh = pwsh +
       ' else {\n' +
-      `  $env:NODE_PATH="${isWindows() ? opts.nodePath.replace(';', ':') : opts.nodePath}"\n` +
+      `  $env:NODE_PATH="${opts.nodePath.replace(/;/g, ':').replace(/\\/g, '/')}"\n` +
       '}'
   }
   pwsh += '\n'

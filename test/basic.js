@@ -173,11 +173,13 @@ test('env shebang with NODE_PATH', function (t) {
         '\n' +
         '\n$exe=""' +
         '\n$env_node_path=$env:NODE_PATH' +
-        '\n$env:NODE_PATH="/john/src/node_modules"' +
+        '\n$env:NODE_PATH="\\john\\src\\node_modules"' +
         '\nif ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {' +
         '\n  # Fix case when both the Windows and Linux builds of Node' +
         '\n  # are installed in the same directory' +
         '\n  $exe=".exe"' +
+        '\n} else {' +
+        '\n  $env:NODE_PATH="/john/src/node_modules"' +
         '\n}' +
         '\n$ret=0' +
         '\nif (Test-Path "$basedir/node$exe") {' +
