@@ -13,6 +13,9 @@ test('no cmd file', function (t) {
   const to = path.resolve(fixtures, 'exe.shim')
   return cmdShim(src, to, {createCmdFile: false})
     .then(function () {
+      console.error('%j', fs.readFileSync(to, 'utf8'))
+      console.error('%j', fs.readFileSync(`${to}.ps1`, 'utf8'))
+
       t.equal(fs.readFileSync(to, 'utf8'),
         '#!/bin/sh' +
         "\nbasedir=$(dirname \"$(echo \"$0\" | sed -e 's,\\\\,/,g')\")" +
@@ -136,6 +139,7 @@ test('env shebang with NODE_PATH', function (t) {
     .then(() => {
       console.error('%j', fs.readFileSync(to, 'utf8'))
       console.error('%j', fs.readFileSync(to + '.cmd', 'utf8'))
+      console.error('%j', fs.readFileSync(`${to}.ps1`, 'utf8'))
 
       t.equal(fs.readFileSync(to, 'utf8'),
         '#!/bin/sh' +
@@ -163,6 +167,29 @@ test('env shebang with NODE_PATH', function (t) {
         '\n  @SET PATHEXT=%PATHEXT:;.JS;=;%\r' +
         '\n  node  "%~dp0\\src.env" %*\r' +
         '\n)')
+      t.equal(fs.readFileSync(`${to}.ps1`, 'utf8'),
+        '#!/usr/bin/env pwsh' +
+        '\n$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent' +
+        '\n' +
+        '\n$exe=""' +
+        '\n$env_node_path=$env:NODE_PATH' +
+        '\n$env:NODE_PATH="/john/src/node_modules"' +
+        '\nif ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {' +
+        '\n  # Fix case when both the Windows and Linux builds of Node' +
+        '\n  # are installed in the same directory' +
+        '\n  $exe=".exe"' +
+        '\n}' +
+        '\n$ret=0' +
+        '\nif (Test-Path "$basedir/node$exe") {' +
+        '\n  & "$basedir/node$exe"  "$basedir/src.env" $args' +
+        '\n  $ret=$LASTEXITCODE' +
+        '\n} else {' +
+        '\n  & "node$exe"  "$basedir/src.env" $args' +
+        '\n  $ret=$LASTEXITCODE' +
+        '\n}' +
+        '\n$env:NODE_PATH=$env_node_path' +
+        '\nexit $ret' +
+        '\n')
       t.end()
     })
 })
@@ -174,6 +201,7 @@ test('env shebang with default args', function (t) {
     .then(() => {
       console.error('%j', fs.readFileSync(to, 'utf8'))
       console.error('%j', fs.readFileSync(to + '.cmd', 'utf8'))
+      console.error('%j', fs.readFileSync(`${to}.ps1`, 'utf8'))
 
       t.equal(fs.readFileSync(to, 'utf8'),
         '#!/bin/sh' +
@@ -200,6 +228,26 @@ test('env shebang with default args', function (t) {
         '\n  @SET PATHEXT=%PATHEXT:;.JS;=;%\r' +
         '\n  node --preserve-symlinks "%~dp0\\src.env" %*\r' +
         '\n)')
+      t.equal(fs.readFileSync(`${to}.ps1`, 'utf8'),
+        '#!/usr/bin/env pwsh' +
+        '\n$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent' +
+        '\n' +
+        '\n$exe=""' +
+        '\nif ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {' +
+        '\n  # Fix case when both the Windows and Linux builds of Node' +
+        '\n  # are installed in the same directory' +
+        '\n  $exe=".exe"' +
+        '\n}' +
+        '\n$ret=0' +
+        '\nif (Test-Path "$basedir/node$exe") {' +
+        '\n  & "$basedir/node$exe" --preserve-symlinks "$basedir/src.env" $args' +
+        '\n  $ret=$LASTEXITCODE' +
+        '\n} else {' +
+        '\n  & "node$exe" --preserve-symlinks "$basedir/src.env" $args' +
+        '\n  $ret=$LASTEXITCODE' +
+        '\n}' +
+        '\nexit $ret' +
+        '\n')
       t.end()
     })
 })

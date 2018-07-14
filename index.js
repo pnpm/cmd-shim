@@ -19,6 +19,8 @@ const path = require('path')
 const isWindows = require('is-windows')
 const shebangExpr = /^#!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+)(.*)$/
 const DEFAULT_OPTIONS = {
+  // Create PowerShell file by default if the option hasn't been specified
+  createPwshFile: true,
   createCmdFile: isWindows()
 }
 
@@ -51,7 +53,7 @@ function cmdShim_ (src, to, opts) {
 }
 
 function writeShim (src, to, opts) {
-  opts = opts || {}
+  opts = Object.assign({}, DEFAULT_OPTIONS, opts)
   const defaultArgs = opts.preserveSymlinks ? '--preserve-symlinks' : ''
   // make a cmd file and a sh script
   // First, check if the bin is a #! of some sort.
@@ -73,9 +75,7 @@ function writeShim (src, to, opts) {
 }
 
 function writeShim_ (src, to, opts) {
-  opts = opts || {}
-  // Create PowerShell file by default if the option hasn't been specified
-  opts.createPwshFile = (typeof opts.createPwshFile !== 'undefined' ? opts.createPwshFile : true)
+  opts = Object.assign({}, DEFAULT_OPTIONS, opts)
   let shTarget = path.relative(path.dirname(to), src)
   let target = shTarget.split('/').join('\\')
   let longProg
@@ -187,11 +187,20 @@ function writeShim_ (src, to, opts) {
     '$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent\n' +
     '\n' +
     '$exe=""\n' +
+    (opts.nodePath ? '$env_node_path=$env:NODE_PATH\n' +
+      `$env:NODE_PATH="${isWindows() ? opts.nodePath : String(opts.nodePath).replace(':', ';')}"\n` : '') +
     'if ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {\n' +
     '  # Fix case when both the Windows and Linux builds of Node\n' +
     '  # are installed in the same directory\n' +
     '  $exe=".exe"\n' +
-    '}\n'
+    '}'
+  if (opts.nodePath && (String(opts.nodePath).includes(';') || String(opts.nodePath).includes(':'))) {
+    pwsh = pwsh +
+      ' else {\n' +
+      `  $env:NODE_PATH="${isWindows() ? opts.nodePath.replace(';', ':') : opts.nodePath}"\n` +
+      '}'
+  }
+  pwsh += '\n'
   if (shLongProg) {
     pwsh = pwsh +
       '$ret=0\n' +
@@ -202,10 +211,12 @@ function writeShim_ (src, to, opts) {
       `  & ${pwshProg} ${args} ${shTarget} $args\n` +
       '  $ret=$LASTEXITCODE\n' +
       '}\n' +
+      (opts.nodePath ? '$env:NODE_PATH=$env_node_path\n' : '') +
       'exit $ret\n'
   } else {
     pwsh = pwsh +
       `& ${pwshProg} ${args} ${shTarget} $args\n` +
+      (opts.nodePath ? '$env:NODE_PATH=$env_node_path\n' : '') +
       'exit $LASTEXITCODE\n'
   }
 
