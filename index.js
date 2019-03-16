@@ -215,6 +215,15 @@ function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
     .then(() => writeShimPost(to))
 }
 
+/**
+ * Generate the content of a shim for CMD.
+ *
+ * @param {string} src Path to the executable or script.
+ * @param {string} to Path to the shim to be created.
+ * It is highly recommended to end with `.cmd` (or `.bat`).
+ * @param {opts} opts Options.  It must contain `.prog` and `.args`.
+ * @return {string} The content of shim.
+ */
 function generateCmdShim (src, to, opts) {
   let shTarget = path.relative(path.dirname(to), src)
   let target = shTarget.split('/').join('\\')
@@ -259,6 +268,15 @@ function generateCmdShim (src, to, opts) {
   return cmd
 }
 
+/**
+ * Generate the content of a shim for (Ba)sh in, for example, Cygwin and MSYS(2).
+ *
+ * @param {string} src Path to the executable or script.
+ * @param {string} to Path to the shim to be created.
+ * It is highly recommended to end with `.sh` or to contain no extension.
+ * @param {opts} opts Options.  It must contain `.prog` and `.args`.
+ * @return {string} The content of shim.
+ */
 function generateShShim (src, to, opts) {
   let shTarget = path.relative(path.dirname(to), src)
   let target = shTarget.split('/').join('\\')
@@ -326,6 +344,15 @@ function generateShShim (src, to, opts) {
   return sh
 }
 
+/**
+ * Generate the content of a shim for PowerShell.
+ *
+ * @param {string} src Path to the executable or script.
+ * @param {string} to Path to the shim to be created.
+ * It is highly recommended to end with `.ps1`.
+ * @param {opts} opts Options.  It must contain `.prog` and `.args`.
+ * @return {string} The content of shim.
+ */
 function generatePwshShim (src, to, opts) {
   let shTarget = path.relative(path.dirname(to), src)
   let target = shTarget.split('/').join('\\')
