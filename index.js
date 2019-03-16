@@ -111,11 +111,14 @@ function cmdShim_ (src, to, opts) {
  */
 function writeAllShims (src, to, srcRuntimeInfo, opts) {
   opts = Object.assign({}, DEFAULT_OPTIONS, opts)
-  return Promise.all([
-    [generateShShim, '', true],
-    [generateCmdShim, '.cmd', opts.createCmdFile],
-    [generatePwshShim, '.ps1', opts.createPwshFile]
-  ].map(([generateShimScript, extension, shouldCreate]) => shouldCreate && writeShim(src, to + extension, srcRuntimeInfo, generateShimScript, opts)))
+  const generatorAndExtPairs = [[generateShShim, '']]
+  if (opts.createCmdFile) {
+    generatorAndExtPairs.push([generateCmdShim, '.cmd'])
+  }
+  if (opts.createPwshFile) {
+    generatorAndExtPairs.push([generatePwshShim, '.ps1'])
+  }
+  return Promise.all(generatorAndExtPairs.map(([generateShimScript, extension]) => writeShim(src, to + extension, srcRuntimeInfo, generateShimScript, opts)))
 }
 
 /**
