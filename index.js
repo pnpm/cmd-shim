@@ -102,6 +102,11 @@ function writeShimPre (target) {
   return rm(target).then(() => mkdir(path.dirname(target)))
 }
 
+/**
+ * Do processes after writing the shim.
+ *
+ * @param {string} target Path to just created shim.
+ */
 function writeShimPost (target) {
   // Only chmoding shims as of now.
   // Some other processes may be appended.
@@ -364,6 +369,7 @@ function generatePwshShim (src, to, opts) {
 
   return pwsh
 }
+
 
 function chmodShim (to) {
   return fs.chmod(to, 0o755)
