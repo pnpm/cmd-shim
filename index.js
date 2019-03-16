@@ -370,7 +370,11 @@ function generatePwshShim (src, to, opts) {
   return pwsh
 }
 
-
+/**
+ * Chmod just created shim and make it executable
+ *
+ * @param {string} to Path to shim.
+ */
 function chmodShim (to) {
   return fs.chmod(to, 0o755)
 }
