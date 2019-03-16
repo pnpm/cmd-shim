@@ -225,24 +225,22 @@ function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
  * @return {string} The content of shim.
  */
 function generateCmdShim (src, to, opts) {
-  let shTarget = path.relative(path.dirname(to), src)
+  // `shTarget` is not used to generate the content.
+  const shTarget = path.relative(path.dirname(to), src)
   let target = shTarget.split('/').join('\\')
   let longProg
   let prog = opts.prog
-  shTarget = shTarget.split('\\').join('/')
   let args = opts.args || ''
-  let {
+  const {
     win32: nodePath
   } = normalizePathEnvVar(opts.nodePath)
   if (!prog) {
     prog = `"%~dp0\\${target}"`
     args = ''
     target = ''
-    shTarget = ''
   } else {
     longProg = `"%~dp0\\${prog}.exe"`
     target = `"%~dp0\\${target}"`
-    shTarget = `"$basedir/${shTarget}"`
   }
 
   // @IF EXIST "%~dp0\node.exe" (
@@ -279,24 +277,19 @@ function generateCmdShim (src, to, opts) {
  */
 function generateShShim (src, to, opts) {
   let shTarget = path.relative(path.dirname(to), src)
-  let target = shTarget.split('/').join('\\')
-  let prog = opts.prog
-  let shProg = prog && prog.split('\\').join('/')
+  let shProg = opts.prog && opts.prog.split('\\').join('/')
   let shLongProg
   shTarget = shTarget.split('\\').join('/')
   let args = opts.args || ''
-  let {
+  const {
     posix: shNodePath
   } = normalizePathEnvVar(opts.nodePath)
-  if (!prog) {
-    prog = `"%~dp0\\${target}"`
+  if (!shProg) {
     shProg = `"$basedir/${shTarget}"`
     args = ''
-    target = ''
     shTarget = ''
   } else {
-    shLongProg = '"$basedir/' + prog + '"'
-    target = `"%~dp0\\${target}"`
+    shLongProg = `"$basedir/${opts.prog}"`
     shTarget = `"$basedir/${shTarget}"`
   }
 
@@ -355,10 +348,7 @@ function generateShShim (src, to, opts) {
  */
 function generatePwshShim (src, to, opts) {
   let shTarget = path.relative(path.dirname(to), src)
-  let target = shTarget.split('/').join('\\')
-  let prog = opts.prog
-  let shProg = prog && prog.split('\\').join('/')
-  let shLongProg
+  const shProg = opts.prog && opts.prog.split('\\').join('/')
   let pwshProg = shProg && `"${shProg}$exe"`
   let pwshLongProg
   shTarget = shTarget.split('\\').join('/')
@@ -367,17 +357,12 @@ function generatePwshShim (src, to, opts) {
     win32: nodePath,
     posix: shNodePath
   } = normalizePathEnvVar(opts.nodePath)
-  if (!prog) {
-    prog = `"%~dp0\\${target}"`
-    shProg = `"$basedir/${shTarget}"`
-    pwshProg = shProg
+  if (!pwshProg) {
+    pwshProg = `"$basedir/${shTarget}"`
     args = ''
-    target = ''
     shTarget = ''
   } else {
-    shLongProg = '"$basedir/' + prog + '"'
-    pwshLongProg = `"$basedir/${prog}$exe"`
-    target = `"%~dp0\\${target}"`
+    pwshLongProg = `"$basedir/${opts.prog}$exe"`
     shTarget = `"$basedir/${shTarget}"`
   }
 
@@ -417,7 +402,7 @@ function generatePwshShim (src, to, opts) {
       '}'
   }
   pwsh += '\n'
-  if (shLongProg) {
+  if (pwshLongProg) {
     pwsh = pwsh +
       '$ret=0\n' +
       `if (Test-Path ${pwshLongProg}) {\n` +
