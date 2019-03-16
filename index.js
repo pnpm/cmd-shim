@@ -98,6 +98,11 @@ function writeAllShims (src, to, srcRuntimeInfo, opts) {
   ].map(([generateShimScript, extension, shouldCreate]) => shouldCreate && writeShim(src, to + extension, srcRuntimeInfo, generateShimScript, opts)))
 }
 
+/**
+ * Do processes before writing shim.
+ *
+ * @param {string} target Path to shim that is going to be created.
+ */
 function writeShimPre (target) {
   return rm(target).then(() => mkdir(path.dirname(target)))
 }
