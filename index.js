@@ -197,7 +197,8 @@ function searchScriptRuntime (target) {
  * @param {string} src Path to the executable or script.
  * @param {string} to Path to the (sh) shim(s) that is going to be created.
  * @param {RuntimeInfo} srcRuntimeInfo Result of `await searchScriptRuntime(src)`.
- * @param {(src: string, to: string, opts: Options) => string} generateShimScript Generator of shim script.
+ * @typedef {(src: string, to: string, opts: Options) => string} ShimGenerator
+ * @param {ShimGenerator} generateShimScript Generator of shim script.
  * @param {Options} opts Other options.
  */
 function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
@@ -218,6 +219,7 @@ function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
 /**
  * Generate the content of a shim for CMD.
  *
+ * @type {ShimGenerator}
  * @param {string} src Path to the executable or script.
  * @param {string} to Path to the shim to be created.
  * It is highly recommended to end with `.cmd` (or `.bat`).
@@ -269,6 +271,7 @@ function generateCmdShim (src, to, opts) {
 /**
  * Generate the content of a shim for (Ba)sh in, for example, Cygwin and MSYS(2).
  *
+ * @type {ShimGenerator}
  * @param {string} src Path to the executable or script.
  * @param {string} to Path to the shim to be created.
  * It is highly recommended to end with `.sh` or to contain no extension.
@@ -340,6 +343,7 @@ function generateShShim (src, to, opts) {
 /**
  * Generate the content of a shim for PowerShell.
  *
+ * @type {ShimGenerator}
  * @param {string} src Path to the executable or script.
  * @param {string} to Path to the shim to be created.
  * It is highly recommended to end with `.ps1`.
