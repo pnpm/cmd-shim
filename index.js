@@ -108,6 +108,16 @@ function writeShimPost (target) {
   return chmodShim(target)
 }
 
+/**
+ * Look into runtime (e.g. `node` & `sh` & `pwsh`) and its arguments
+ * of the target program (script or executable).
+ *
+ * @param {string} target Path to the executable or script.
+ * @typedef {{program?: string, additionalArgs: string}} RuntimeInfo If `.program` is `null`,
+ * the program may be a binary executable or something and can be called from shells by just its path.
+ * (e.g. `.\foo.exe` in CMD or PowerShell)
+ * @return {Promise<RuntimeInfo>} Promise of infomation of runtime of `target`.
+ */
 function searchScriptRuntime (target) {
   return fs
     .readFile(target, 'utf8')
