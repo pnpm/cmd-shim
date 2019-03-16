@@ -78,6 +78,15 @@ function rm (path) {
   return fs.unlink(path).catch(() => {})
 }
 
+/**
+ * Try to create shims **even if `src` is missing**.
+ *
+ * @param {string} src Path to program (executable or script).
+ * @param {string} to Path to shims.
+ * Don't add an extension if you will create multiple types of shims.
+ * @param {Options} opts Options.
+ *
+ */
 function cmdShim_ (src, to, opts) {
   opts = Object.assign({}, DEFAULT_OPTIONS, opts)
   return searchScriptRuntime(src).then((srcRuntimeInfo) => {
