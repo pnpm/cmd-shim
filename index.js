@@ -143,6 +143,16 @@ function searchScriptRuntime (target) {
     })
 }
 
+/**
+ * Write shim to the file system while executing the pre- and post-processes
+ * defined in `WriteShimPre` and `WriteShimPost`.
+ *
+ * @param {string} src Path to the executable or script.
+ * @param {string} to Path to the (sh) shim(s) that is going to be created.
+ * @param {RuntimeInfo} srcRuntimeInfo Result of `await searchScriptRuntime(src)`.
+ * @param {(src: string, to: string, opts: Options) => string} generateShimScript Generator of shim script.
+ * @param {Options} opts Other options.
+ */
 function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
   const defaultArgs = opts.preserveSymlinks ? '--preserve-symlinks' : ''
   // `Array.prototype.flter` removes ''.
