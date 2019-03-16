@@ -27,6 +27,10 @@ const DEFAULT_OPTIONS = {
   createPwshFile: true,
   createCmdFile: isWindows()
 }
+/**
+ * Map from extensions of files that this module is frequently used for to their runtime.
+ * @type {Map<string, string>}
+ */
 const extensionToProgramMap = new Map([
   ['.js', 'node'],
   ['.cmd', 'cmd'],
