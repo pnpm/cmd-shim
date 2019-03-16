@@ -89,6 +89,17 @@ function cmdShim_ (src, to, opts) {
   })
 }
 
+/**
+ * Write all types (sh & cmd & pwsh) of shims to files.
+ * Extensions (`.cmd` and `.ps1`) are appended to cmd and pwsh shims.
+ *
+ *
+ * @param {string} src Path to program (executable or script).
+ * @param {string} to Path to shims **without extensions**.
+ * Extensions are added for CMD and PowerShell shims.
+ * @param {srcRuntimeInfo} srcRuntimeInfo Return value of `await searchScriptRuntime(src)`.
+ * @param {Options} opts Options.
+ */
 function writeAllShims (src, to, srcRuntimeInfo, opts) {
   opts = Object.assign({}, DEFAULT_OPTIONS, opts)
   return Promise.all([
