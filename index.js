@@ -94,8 +94,18 @@ function cmdShim_ (src, to, opts) {
     // Append your code here to change the behavior in response to `srcRuntimeInfo`.
 
     // Create 3 shims for (Ba)sh in Cygwin / MSYS, no extension) & CMD (.cmd) & PowerShell (.ps1)
-    return writeAllShims(src, to, srcRuntimeInfo, opts)
+    return writeShimsPreCommon(to).then(() => writeAllShims(src, to, srcRuntimeInfo, opts))
   })
+}
+
+/**
+ * Do processes before **all** shims are created.
+ * This must be called **only once** for one call of `cmdShim(IfExists)`.
+ *
+ * @param {string} target Path of shims that are going to be created.
+ */
+function writeShimsPreCommon (target) {
+  return mkdir(path.dirname(target))
 }
 
 /**
@@ -127,7 +137,7 @@ function writeAllShims (src, to, srcRuntimeInfo, opts) {
  * @param {string} target Path to shim that is going to be created.
  */
 function writeShimPre (target) {
-  return rm(target).then(() => mkdir(path.dirname(target)))
+  return rm(target)
 }
 
 /**
