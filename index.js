@@ -197,7 +197,6 @@ function searchScriptRuntime (target) {
  * @param {string} src Path to the executable or script.
  * @param {string} to Path to the (sh) shim(s) that is going to be created.
  * @param {RuntimeInfo} srcRuntimeInfo Result of `await searchScriptRuntime(src)`.
- * @typedef {(src: string, to: string, opts: Options) => string} ShimGenerator
  * @param {ShimGenerator} generateShimScript Generator of shim script.
  * @param {Options} opts Other options.
  */
@@ -215,6 +214,15 @@ function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
     .then(() => fs.writeFile(to, generateShimScript(src, to, opts), 'utf8'))
     .then(() => writeShimPost(to))
 }
+
+/**
+ * Callback functions to generate scripts for shims.
+ * @callback ShimGenerator
+ * @param {string} src Path to the executable or script.
+ * @param {string} to Path to the shim(s) that is going to be created.
+ * @param {Options} opts Options.
+ * @return {string} Generated script for shim.
+ */
 
 /**
  * Generate the content of a shim for CMD.
