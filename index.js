@@ -347,7 +347,7 @@ function generateShShim (src, to, opts) {
  * @param {string} src Path to the executable or script.
  * @param {string} to Path to the shim to be created.
  * It is highly recommended to end with `.ps1`.
- * @param {opts} opts Options.  It must contain `.prog` and `.args`.
+ * @param {Options} opts Options.
  * @return {string} The content of shim.
  */
 function generatePwshShim (src, to, opts) {
