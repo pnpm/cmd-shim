@@ -160,9 +160,11 @@ function writeShimPost (target) {
  * of the target program (script or executable).
  *
  * @param {string} target Path to the executable or script.
- * @typedef {{program?: string, additionalArgs: string}} RuntimeInfo If `.program` is `null`,
- * the program may be a binary executable or something and can be called from shells by just its path.
+ * @typedef {object} RuntimeInfo
+ * @property {string|null} [program] If `program` is `null`, the program may
+ * be a binary executable and can be called from shells by just its path.
  * (e.g. `.\foo.exe` in CMD or PowerShell)
+ * @property {string} additionalArgs
  * @return {Promise<RuntimeInfo>} Promise of infomation of runtime of `target`.
  */
 function searchScriptRuntime (target) {
