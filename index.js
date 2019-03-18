@@ -120,7 +120,7 @@ function writeShimsPreCommon (target) {
  * @param {string} src Path to program (executable or script).
  * @param {string} to Path to shims **without extensions**.
  * Extensions are added for CMD and PowerShell shims.
- * @param {srcRuntimeInfo} srcRuntimeInfo Return value of `await searchScriptRuntime(src)`.
+ * @param {RuntimeInfo} srcRuntimeInfo Return value of `await searchScriptRuntime(src)`.
  * @param {Options} opts Options.
  */
 function writeAllShims (src, to, srcRuntimeInfo, opts) {
