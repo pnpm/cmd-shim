@@ -156,15 +156,21 @@ function writeShimPost (target) {
 }
 
 /**
- * Look into runtime (e.g. `node` & `sh` & `pwsh`) and its arguments
- * of the target program (script or executable).
+ * Infomation of runtime and its arguments of the script `target`, defined in the shebang of it.
  *
- * @param {string} target Path to the executable or script.
  * @typedef {object} RuntimeInfo
  * @property {string|null} [program] If `program` is `null`, the program may
  * be a binary executable and can be called from shells by just its path.
  * (e.g. `.\foo.exe` in CMD or PowerShell)
- * @property {string} additionalArgs
+ * @property {string} additionalArgs Additional arguments embedded in the shebang and passed to `program`.
+ * `''` if nothing, unlike `program`.
+ */
+
+/**
+ * Look into runtime (e.g. `node` & `sh` & `pwsh`) and its arguments
+ * of the target program (script or executable).
+ *
+ * @param {string} target Path to the executable or script.
  * @return {Promise<RuntimeInfo>} Promise of infomation of runtime of `target`.
  */
 function searchScriptRuntime (target) {
