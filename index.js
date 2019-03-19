@@ -125,6 +125,7 @@ function writeShimsPreCommon (target) {
  */
 function writeAllShims (src, to, srcRuntimeInfo, opts) {
   opts = Object.assign({}, DEFAULT_OPTIONS, opts)
+  /** @type {Array<[ShimGenerator, string]>} */
   const generatorAndExtPairs = [[generateShShim, '']]
   if (opts.createCmdFile) {
     generatorAndExtPairs.push([generateCmdShim, '.cmd'])
