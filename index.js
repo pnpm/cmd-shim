@@ -14,6 +14,24 @@ cmdShim.ifExists = cmdShimIfExists
 
 /**
  * @typedef {import('./index').Options} Options
+ *
+ * @typedef {object} RuntimeInfo Infomation of runtime and its arguments
+ * of the script `target`, defined in the shebang of it.
+ * @property {string|null} [program] If `program` is `null`, the program may
+ * be a binary executable and can be called from shells by just its path.
+ * (e.g. `.\foo.exe` in CMD or PowerShell)
+ * @property {string} additionalArgs Additional arguments embedded in the shebang and passed to `program`.
+ * `''` if nothing, unlike `program`.
+ *
+ * @callback ShimGenerator Callback functions to generate scripts for shims.
+ * @param {string} src Path to the executable or script.
+ * @param {string} to Path to the shim(s) that is going to be created.
+ * @param {Options} opts Options.
+ * @return {string} Generated script for shim.
+ *
+ * @typedef {object} ShimGenExtTuple
+ * @property {ShimGenerator} generator
+ * @property {string} extension
  */
 
 const fs = require('mz/fs')
@@ -125,7 +143,7 @@ function writeShimsPreCommon (target) {
  */
 function writeAllShims (src, to, srcRuntimeInfo, opts) {
   opts = Object.assign({}, DEFAULT_OPTIONS, opts)
-  /** @type {Array<[ShimGenerator, string]>} */
+  /** @type {ShimGenExtTuple[]} */
   const generatorAndExts = [{ generator: generateShShim, extension: '' }]
   if (opts.createCmdFile) {
     generatorAndExts.push({ generator: generateCmdShim, extension: '.cmd' })
@@ -157,17 +175,6 @@ function writeShimPost (target) {
   // Some other processes may be appended.
   return chmodShim(target)
 }
-
-/**
- * Infomation of runtime and its arguments of the script `target`, defined in the shebang of it.
- *
- * @typedef {object} RuntimeInfo
- * @property {string|null} [program] If `program` is `null`, the program may
- * be a binary executable and can be called from shells by just its path.
- * (e.g. `.\foo.exe` in CMD or PowerShell)
- * @property {string} additionalArgs Additional arguments embedded in the shebang and passed to `program`.
- * `''` if nothing, unlike `program`.
- */
 
 /**
  * Look into runtime (e.g. `node` & `sh` & `pwsh`) and its arguments
@@ -225,16 +232,6 @@ function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
     .then(() => fs.writeFile(to, generateShimScript(src, to, opts), 'utf8'))
     .then(() => writeShimPost(to))
 }
-
-/**
- * Callback functions to generate scripts for shims.
- * @callback ShimGenerator Callback functions to generate scripts for shims.
- *
- * @param {string} src Path to the executable or script.
- * @param {string} to Path to the shim(s) that is going to be created.
- * @param {Options} opts Options.
- * @return {string} Generated script for shim.
- */
 
 /**
  * Generate the content of a shim for CMD.
