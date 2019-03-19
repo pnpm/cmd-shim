@@ -225,7 +225,8 @@ function writeShim (src, to, srcRuntimeInfo, generateShimScript, opts) {
 
 /**
  * Callback functions to generate scripts for shims.
- * @callback ShimGenerator
+ * @callback ShimGenerator Callback functions to generate scripts for shims.
+ *
  * @param {string} src Path to the executable or script.
  * @param {string} to Path to the shim(s) that is going to be created.
  * @param {Options} opts Options.
