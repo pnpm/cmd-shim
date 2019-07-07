@@ -249,7 +249,7 @@ function generateCmdShim (src, to, opts) {
   let args = opts.args || ''
   const nodePath = normalizePathEnvVar(opts.nodePath).win32
   if (!prog) {
-    prog = `"%~dp0\\${target}"`
+    prog = path.isAbsolute(target) ? `"${target}"`:`"%~dp0\\${target}"`
     args = ''
     target = ''
   } else {
