@@ -11,6 +11,7 @@
 
 module.exports = cmdShim
 cmdShim.ifExists = cmdShimIfExists
+cmdShim.__TEST__ = {setFs}
 
 /**
  * @typedef {import('./index').Options} Options
@@ -34,7 +35,22 @@ cmdShim.ifExists = cmdShimIfExists
  * @property {string} extension The file extension for the shim.
  */
 
-const fs = require('mz/fs')
+const {promisify} = require('util')
+
+// fs can be dependency-injected, which we use for testing.
+let fs
+let fsRaw
+setFs(require('fs'))
+function setFs (_fs) {
+  fsRaw = _fs
+  fs = {
+    chmod: _fs.chmod ? promisify(_fs.chmod) : async () => { /* noop */ },
+    stat: promisify(_fs.stat),
+    unlink: promisify(_fs.unlink),
+    readFile: promisify(_fs.readFile),
+    writeFile: promisify(_fs.writeFile)
+  }
+}
 
 const makeDir = require('make-dir')
 const path = require('path')
@@ -126,7 +142,7 @@ async function cmdShim_ (src, to, opts) {
  * @param {string} target Path of shims that are going to be created.
  */
 function writeShimsPreCommon (target) {
-  return makeDir(path.dirname(target))
+  return makeDir(path.dirname(target), {fs: fsRaw})
 }
 
 /**
@@ -244,17 +260,18 @@ function generateCmdShim (src, to, opts) {
   // `shTarget` is not used to generate the content.
   const shTarget = path.relative(path.dirname(to), src)
   let target = shTarget.split('/').join('\\')
+  const quotedPathToTarget = path.isAbsolute(target) ? `"${target}"` : `"%~dp0\\${target}"`
   let longProg
   let prog = opts.prog
   let args = opts.args || ''
   const nodePath = normalizePathEnvVar(opts.nodePath).win32
   if (!prog) {
-    prog = `"%~dp0\\${target}"`
+    prog = quotedPathToTarget
     args = ''
     target = ''
   } else {
     longProg = `"%~dp0\\${prog}.exe"`
-    target = `"%~dp0\\${target}"`
+    target = quotedPathToTarget
   }
 
   // @IF EXIST "%~dp0\node.exe" (
@@ -295,15 +312,16 @@ function generateShShim (src, to, opts) {
   let shProg = opts.prog && opts.prog.split('\\').join('/')
   let shLongProg
   shTarget = shTarget.split('\\').join('/')
+  const quotedPathToTarget = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir/${shTarget}"`
   let args = opts.args || ''
   const shNodePath = normalizePathEnvVar(opts.nodePath).posix
   if (!shProg) {
-    shProg = `"$basedir/${shTarget}"`
+    shProg = quotedPathToTarget
     args = ''
     shTarget = ''
   } else {
     shLongProg = `"$basedir/${opts.prog}"`
-    shTarget = `"$basedir/${shTarget}"`
+    shTarget = quotedPathToTarget
   }
 
   // #!/bin/sh
@@ -366,17 +384,18 @@ function generatePwshShim (src, to, opts) {
   let pwshProg = shProg && `"${shProg}$exe"`
   let pwshLongProg
   shTarget = shTarget.split('\\').join('/')
+  const quotedPathToTarget = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir/${shTarget}"`
   let args = opts.args || ''
   let normalizedPathEnvVar = normalizePathEnvVar(opts.nodePath)
   const nodePath = normalizedPathEnvVar.win32
   const shNodePath = normalizedPathEnvVar.posix
   if (!pwshProg) {
-    pwshProg = `"$basedir/${shTarget}"`
+    pwshProg = quotedPathToTarget
     args = ''
     shTarget = ''
   } else {
     pwshLongProg = `"$basedir/${opts.prog}$exe"`
-    shTarget = `"$basedir/${shTarget}"`
+    shTarget = quotedPathToTarget
   }
 
   // #!/usr/bin/env pwsh
