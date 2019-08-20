@@ -8,7 +8,7 @@
     "url": "http://kochan.io"
   },
   "scripts": {
-    "build": "tsc --build",
+    "build": "tsc --build --verbose --listEmittedFiles",
     "test:unit": "tape test/*.js",
     "test": "pnpm run build && standard && pnpm run test:unit && mos test",
     "md": "mos"
