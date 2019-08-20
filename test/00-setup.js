@@ -8,8 +8,6 @@ const _fs = new MemoryFS()
 const fs = _.mapValues(Object.getPrototypeOf(_fs), (v, k) => typeof v === 'function' ? v.bind(_fs) : v)
 const path = require('path')
 
-const cmdShim = require('../')
-
 const {fixtures, fixtures2} = process.platform === 'win32' ? {
   fixtures: 'I:\\cmd-shim\\fixtures',
   fixtures2: 'J:\\cmd-shim\\fixtures'
@@ -36,7 +34,6 @@ const fixtureFiles = {
 }
 
 test('create fixture', function (t) {
-  cmdShim.__TEST__.setFs(fs)
   for (const [dir, files] of Object.entries(fixtureFiles)) {
     fs.mkdirpSync(dir)
     for (const [filename, contents] of Object.entries(files)) {
