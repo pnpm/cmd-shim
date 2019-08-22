@@ -20,7 +20,6 @@
     "index.js",
     "index.js.map"
   ],
-  "main": "index",
   "repository": {
     "type": "git",
     "url": "https://github.com/pnpm/cmd-shim.git"

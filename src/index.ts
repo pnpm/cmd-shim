@@ -112,7 +112,7 @@ const extensionToProgramMap = new Map([
 ])
 
 function ingestOptions (opts: Options): InternalOptions {
-  const opts_ = Object.assign({}, DEFAULT_OPTIONS, opts) as InternalOptions
+  const opts_ = {...DEFAULT_OPTIONS, ...opts} as InternalOptions
   const fs = opts_.fs
   opts_.fs_ = {
   
@@ -513,7 +513,12 @@ function chmodShim (to: string, opts: InternalOptions) {
   return opts.fs_.chmod(to, 0o755)
 }
 
-function normalizePathEnvVar (nodePath: undefined | string | string[]): {win32:string,posix:string,[index:number]:{win32:string,posix:string}} {
+interface NormalizedPathEnvVar {
+  win32: string
+  posix: string
+  [index:number]: {win32:string,posix:string}
+}
+function normalizePathEnvVar (nodePath: undefined | string | string[]): NormalizedPathEnvVar {
   if (!nodePath) {
     return {
       win32: '',
@@ -521,7 +526,7 @@ function normalizePathEnvVar (nodePath: undefined | string | string[]): {win32:s
     }
   }
   let split = (typeof nodePath === 'string' ? nodePath.split(path.delimiter) : Array.from(nodePath))
-  let result = {} as {win32:string,posix:string,[index:number]:{win32:string,posix:string}}
+  let result = {} as NormalizedPathEnvVar
   for (let i = 0; i < split.length; i++) {
     const win32 = split[i].split('/').join('\\')
     const posix = isWindows() ? split[i].split('\\').join('/').replace(/^([^:\\/]*):/, (_, $1) => `/mnt/${$1.toLowerCase()}`) : split[i]
