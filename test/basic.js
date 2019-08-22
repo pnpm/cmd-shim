@@ -432,7 +432,7 @@ test('explicit shebang with args', function (t) {
     })
 })
 
-(process.platform === 'win32' ? test : test.skip)('explicit shebang with args, linking to another drive on Windows', function (t) {
+;(process.platform === 'win32' ? test : test.skip)('explicit shebang with args, linking to another drive on Windows', function (t) {
   const src = path.resolve(fixtures2, 'src.sh.args')
   const to = path.resolve(fixtures, 'sh.args.shim')
   return cmdShim(src, to, {createCmdFile: true, fs})
