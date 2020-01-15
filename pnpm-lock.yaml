@@ -1,6 +1,7 @@
 dependencies:
   is-windows: 1.0.2
   make-dir: 3.0.0
+  strip-indent: 3.0.0
 devDependencies:
   '@types/is-windows': 0.2.0
   '@types/node': 12.7.2
@@ -3711,6 +3712,12 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-jf84uxzwiuiIVKiOLpfYk7N46TSy8ubTonmneY9vrpHNAnp0QBt2BxWV9dO3/j+BoVAb+a5G6YDPW3M5HOdMWQ==
+  /min-indent/1.0.0:
+    dev: false
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha1-z8RcN+nsDY8KDsPdTvf3w6vjklY=
   /minimatch/3.0.4:
     dependencies:
       brace-expansion: 1.1.11
@@ -5477,6 +5484,14 @@ packages:
     hasBin: true
     resolution:
       integrity: sha1-DHlipq3vp7vUrDZkYKY4VSrhoKI=
+  /strip-indent/3.0.0:
+    dependencies:
+      min-indent: 1.0.0
+    dev: false
+    engines:
+      node: '>=8'
+    resolution:
+      integrity: sha512-laJTa3Jb+VQpaC6DseHhF7dXVqHTfJPCRDaEbid/drOhgitgYku/letMUqOXFoWV0zIIUbjpdH2t+tYj4bQMRQ==
   /strip-json-comments/2.0.1:
     dev: true
     engines:
@@ -6109,4 +6124,5 @@ specifiers:
   mos: ^1.3.1
   mos-plugin-readme: ^1.0.4
   standard: ^14.0.2
+  strip-indent: ^3.0.0
   typescript: ^3.7.4
