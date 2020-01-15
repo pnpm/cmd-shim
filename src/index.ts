@@ -398,18 +398,16 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
         *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
     esac
   `).trim() + '\n\n'
-  const env = opts.nodePath ? `NODE_PATH="${shNodePath}" ` : ''
+  const env = opts.nodePath ? `export NODE_PATH="${shNodePath}"` : ''
 
   if (shLongProg) {
     sh += stripIndent(`
+      ${env}
       if [ -x ${shLongProg} ]; then
-        ${env + shLongProg} ${args} ${shTarget} "$@"
-        ret=$?
+        exec ${shLongProg} ${args} ${shTarget} "$@"
       else\x20
-        ${env + shProg} ${args} ${shTarget} "$@"
-        ret=$?
+        exec ${shProg} ${args} ${shTarget} "$@"
       fi
-      exit $ret
     `).trim() + '\n'
   } else {
     sh += stripIndent(`
