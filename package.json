@@ -51,6 +51,11 @@
       "readme"
     ]
   },
+  "standard": {
+    "env": {
+      "jest": true
+    }
+  },
   "jest": {
     "testEnvironment": "node"
   }
