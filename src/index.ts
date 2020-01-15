@@ -92,6 +92,7 @@ import {promisify} from 'util'
 import makeDir = require('make-dir')
 import path = require('path')
 import isWindows = require('is-windows')
+import stripIndent = require('strip-indent')
 const shebangExpr = /^#!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+)(.*)$/
 const DEFAULT_OPTIONS = {
   // Create PowerShell file by default if the option hasn't been specified
@@ -389,29 +390,32 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   // fi
   // exit $ret
 
-  let sh = '#!/bin/sh\n'
-  sh = sh +
-    "basedir=$(dirname \"$(echo \"$0\" | sed -e 's,\\\\,/,g')\")\n" +
-    '\n' +
-    'case `uname` in\n' +
-    '    *CYGWIN*) basedir=`cygpath -w "$basedir"`;;\n' +
-    'esac\n' +
-    '\n'
+  let sh = stripIndent(`
+    #!/bin/sh
+    basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+
+    case \`uname\` in
+        *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    esac
+  `).trim() + '\n\n'
   const env = opts.nodePath ? `NODE_PATH="${shNodePath}" ` : ''
 
   if (shLongProg) {
-    sh = sh +
-      'if [ -x ' + shLongProg + ' ]; then\n' +
-      '  ' + env + shLongProg + ' ' + args + ' ' + shTarget + ' "$@"\n' +
-      '  ret=$?\n' +
-      'else \n' +
-      '  ' + env + shProg + ' ' + args + ' ' + shTarget + ' "$@"\n' +
-      '  ret=$?\n' +
-      'fi\n' +
-      'exit $ret\n'
+    sh += stripIndent(`
+      if [ -x ${shLongProg} ]; then
+        ${env + shLongProg} ${args} ${shTarget} "$@"
+        ret=$?
+      else\x20
+        ${env + shProg} ${args} ${shTarget} "$@"
+        ret=$?
+      fi
+      exit $ret
+    `).trim() + '\n'
   } else {
-    sh = sh + env + shProg + ' ' + args + ' ' + shTarget + ' "$@"\n' +
-      'exit $?\n'
+    sh += stripIndent(`
+      ${env + shProg} ${args} ${shTarget} "$@"
+      exit $?
+    `).trim() + '\n'
   }
 
   return sh
