@@ -387,7 +387,6 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   // else
   //   exec node "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
   // fi
-  // exit $ret
 
   let sh = '#!/bin/sh\n'
   sh = sh +
