@@ -45,7 +45,7 @@ namespace cmdShim {
     /**
      * The arguments to initialize the target process with, before the actual CLI arguments
      */
-    progArgs?: string
+    progArgs?: string[]
 
     /**
      * The value of the $NODE_PATH environment variable.
@@ -329,7 +329,7 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
     target = quotedPathToTarget
   }
 
-  let progArgs = opts.progArgs ? `${opts.progArgs} ` : ''
+  let progArgs = opts.progArgs ? `${opts.progArgs.join(` `)} ` : ''
 
   // @IF EXIST "%~dp0\node.exe" (
   //   "%~dp0\node.exe" "%~dp0\.\node_modules\npm\bin\npm-cli.js" %*
@@ -380,7 +380,7 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
     shTarget = quotedPathToTarget
   }
 
-  let progArgs = opts.progArgs ? `${opts.progArgs} ` : ''
+  let progArgs = opts.progArgs ? `${opts.progArgs.join(` `)} ` : ''
 
   // #!/bin/sh
   // basedir=`dirname "$0"`
@@ -451,7 +451,7 @@ function generatePwshShim (src: string, to: string, opts: InternalOptions): stri
     shTarget = quotedPathToTarget
   }
 
-  let progArgs = opts.progArgs ? `${opts.progArgs} ` : ''
+  let progArgs = opts.progArgs ? `${opts.progArgs.join(` `)} ` : ''
 
   // #!/usr/bin/env pwsh
   // $basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent

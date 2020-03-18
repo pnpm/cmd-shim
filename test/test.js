@@ -435,7 +435,7 @@ test('explicit shebang with args', async () => {
 test('explicit shebang with prog args', async () => {
   const src = path.resolve(fixtures, 'src.sh.args')
   const to = path.resolve(fixtures, 'sh.args.shim')
-  await cmdShim(src, to, { createCmdFile: true, progArgs: 'hello', fs })
+  await cmdShim(src, to, { createCmdFile: true, progArgs: ['hello'], fs })
   expect(fs.readFileSync(to, 'utf8')).toBe(
     '#!/bin/sh' +
     "\nbasedir=$(dirname \"$(echo \"$0\" | sed -e 's,\\\\,/,g')\")" +
