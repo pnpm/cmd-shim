@@ -60,7 +60,10 @@ namespace cmdShim {
      */
     fs?: typeof import('fs')
 
-    nodeProg?: string
+    /*
+     * Path to the Node.js executable
+     */
+    nodeExecPath?: string
   }
 }
 type Options = cmdShim.Options
@@ -327,8 +330,8 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
     prog = quotedPathToTarget
     args = ''
     target = ''
-  } else if (prog === 'node' && opts.nodeProg) {
-    prog = `"${opts.nodeProg}"`
+  } else if (prog === 'node' && opts.nodeExecPath) {
+    prog = `"${opts.nodeExecPath}"`
     target = quotedPathToTarget
   } else {
     longProg = `"%~dp0\\${prog}.exe"`
@@ -391,8 +394,8 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
     shProg = quotedPathToTarget
     args = ''
     shTarget = ''
-  } else if (opts.prog === 'node' && opts.nodeProg) {
-    shProg = `"${opts.nodeProg}"`
+  } else if (opts.prog === 'node' && opts.nodeExecPath) {
+    shProg = `"${opts.nodeExecPath}"`
     shTarget = quotedPathToTarget
   } else {
     shLongProg = `"$basedir/${opts.prog}"`
@@ -477,8 +480,8 @@ function generatePwshShim (src: string, to: string, opts: InternalOptions): stri
     pwshProg = quotedPathToTarget
     args = ''
     shTarget = ''
-  } else if (opts.prog === 'node' && opts.nodeProg) {
-    pwshProg = `"${opts.nodeProg}"`
+  } else if (opts.prog === 'node' && opts.nodeExecPath) {
+    pwshProg = `"${opts.nodeExecPath}"`
     shTarget = quotedPathToTarget
   } else {
     pwshLongProg = `"$basedir/${opts.prog}$exe"`
