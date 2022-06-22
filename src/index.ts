@@ -64,6 +64,8 @@ namespace cmdShim {
      * Path to the Node.js executable
      */
     nodeExecPath?: string
+
+    prependToPath?: string
   }
 }
 type Options = cmdShim.Options
@@ -429,6 +431,11 @@ case \`uname\` in
 esac
 
 `
+  if (opts.prependToPath) {
+    sh += `\
+export PATH="${opts.prependToPath}:$PATH"
+`
+  }
   if (shNodePath) {
       sh += `\
 if [ -z "$NODE_PATH" ]; then
