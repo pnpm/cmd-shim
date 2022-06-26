@@ -214,12 +214,19 @@ exports[`env shebang with PATH extending env.shim.ps1 1`] = `
 $basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
 
 $exe=\\"\\"
+$pathsep=\\":\\"
+$env_path=$env:PATH
+$prepend_path=\\"\\\\add-to-path\\"
 if ($PSVersionTable.PSVersion -lt \\"6.0\\" -or $IsWindows) {
   # Fix case when both the Windows and Linux builds of Node
   # are installed in the same directory
   $exe=\\".exe\\"
+  $pathsep=\\";\\"
+} else {
+  $prepend_path=\\"/add-to-path\\"
 }
-$env:PATH=\\"/add-to-path$pathsep$env:PATH\\"
+
+$env:PATH=\\"$prepend_path$pathsep$env:PATH\\"
 
 $ret=0
 if (Test-Path \\"$basedir/node$exe\\") {
@@ -239,6 +246,7 @@ if (Test-Path \\"$basedir/node$exe\\") {
   }
   $ret=$LASTEXITCODE
 }
+$env:PATH=$env_path
 exit $ret
 "
 `;

@@ -485,9 +485,12 @@ function generatePwshShim (src: string, to: string, opts: InternalOptions): stri
   shTarget = shTarget.split('\\').join('/')
   const quotedPathToTarget = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir/${shTarget}"`
   let args = opts.args || ''
-  let normalizedPathEnvVar = normalizePathEnvVar(opts.nodePath)
-  const nodePath = normalizedPathEnvVar.win32
-  const shNodePath = normalizedPathEnvVar.posix
+  let normalizedNodePathEnvVar = normalizePathEnvVar(opts.nodePath)
+  const nodePath = normalizedNodePathEnvVar.win32
+  const shNodePath = normalizedNodePathEnvVar.posix
+  let normalizedPrependPathEnvVar = normalizePathEnvVar(opts.prependToPath)
+  const prependPath = normalizedPrependPathEnvVar.win32
+  const shPrependPath = normalizedPrependPathEnvVar.posix
   if (!pwshProg) {
     pwshProg = quotedPathToTarget
     args = ''
@@ -535,22 +538,31 @@ function generatePwshShim (src: string, to: string, opts: InternalOptions): stri
 $basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
 
 $exe=""
+${(nodePath || prependPath) ? '$pathsep=":"\n' : ''}\
 ${nodePath ? `\
-$pathsep=":"
 $env_node_path=$env:NODE_PATH
 $new_node_path="${nodePath}"
+` : ''}\
+${prependPath ? `\
+$env_path=$env:PATH
+$prepend_path="${prependPath}"
 ` : ''}\
 if ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {
   # Fix case when both the Windows and Linux builds of Node
   # are installed in the same directory
   $exe=".exe"
-${nodePath ? '  $pathsep=";"\n' : ''}\
+${(nodePath || prependPath) ? '  $pathsep=";"\n' : ''}\
 }`
-  if (shNodePath) {
+  if (shNodePath || shPrependPath) {
     pwsh += `\
  else {
-  $new_node_path="${shNodePath}"
+${shNodePath ? `  $new_node_path="${shNodePath}"\n` : ''}\
+${shPrependPath ? `  $prepend_path="${shPrependPath}"\n` : ''}\
 }
+`
+  }
+  if (shNodePath) {
+    pwsh += `\
 if ([string]::IsNullOrEmpty($env_node_path)) {
   $env:NODE_PATH=$new_node_path
 } else {
@@ -560,7 +572,7 @@ if ([string]::IsNullOrEmpty($env_node_path)) {
   }
   if (opts.prependToPath) {
     pwsh += `
-$env:PATH="${opts.prependToPath}$pathsep$env:PATH"
+$env:PATH="$prepend_path$pathsep$env:PATH"
 `
   }
   if (pwshLongProg) {
@@ -584,6 +596,7 @@ if (Test-Path ${pwshLongProg}) {
   $ret=$LASTEXITCODE
 }
 ${nodePath ? '$env:NODE_PATH=$env_node_path\n' : ''}\
+${prependPath ? '$env:PATH=$env_path\n' : ''}\
 exit $ret
 `
   } else {
@@ -595,6 +608,7 @@ if ($MyInvocation.ExpectingInput) {
   & ${pwshProg} ${args} ${shTarget} ${progArgs}$args
 }
 ${nodePath ? '$env:NODE_PATH=$env_node_path\n' : ''}\
+${prependPath ? '$env:PATH=$env_path\n' : ''}\
 exit $LASTEXITCODE
 `
   }
