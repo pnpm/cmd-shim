@@ -352,9 +352,7 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
   // )
   let cmd = '@SETLOCAL\r\n'
   if (opts.prependToPath) {
-    cmd += `\
-@SET PATH="${opts.prependToPath}:%PATH%"
-`
+    cmd += `@SET PATH="${opts.prependToPath}:%PATH%"\r\n`
   }
   if (nodePath) {
       cmd += `\
@@ -547,11 +545,6 @@ if ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {
   $exe=".exe"
 ${nodePath ? '  $pathsep=";"\n' : ''}\
 }`
-  if (opts.prependToPath) {
-    pwsh += `\
-$env:PATH="${opts.prependToPath}$pathsep$env:PATH"
-`
-  }
   if (shNodePath) {
     pwsh += `\
  else {
@@ -562,6 +555,11 @@ if ([string]::IsNullOrEmpty($env_node_path)) {
 } else {
   $env:NODE_PATH="$env_node_path$pathsep$new_node_path"
 }
+`
+  }
+  if (opts.prependToPath) {
+    pwsh += `
+$env:PATH="${opts.prependToPath}$pathsep$env:PATH"
 `
   }
   if (pwshLongProg) {
