@@ -351,6 +351,11 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
   //   node "%~dp0\.\node_modules\npm\bin\npm-cli.js" %*
   // )
   let cmd = '@SETLOCAL\r\n'
+  if (opts.prependToPath) {
+    cmd += `\
+@SET PATH="${opts.prependToPath}:%PATH%"
+`
+  }
   if (nodePath) {
       cmd += `\
 @IF NOT DEFINED NODE_PATH (\r
@@ -542,6 +547,11 @@ if ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {
   $exe=".exe"
 ${nodePath ? '  $pathsep=";"\n' : ''}\
 }`
+  if (opts.prependToPath) {
+    pwsh += `\
+$env:PATH="${opts.prependToPath}$pathsep$env:PATH"
+`
+  }
   if (shNodePath) {
     pwsh += `\
  else {
