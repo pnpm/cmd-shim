@@ -329,6 +329,7 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
   let prog = opts.prog
   let args = opts.args || ''
   const nodePath = normalizePathEnvVar(opts.nodePath).win32
+  const prependToPath = normalizePathEnvVar(opts.prependToPath).win32
   if (!prog) {
     prog = quotedPathToTarget
     args = ''
@@ -351,8 +352,8 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
   //   node "%~dp0\.\node_modules\npm\bin\npm-cli.js" %*
   // )
   let cmd = '@SETLOCAL\r\n'
-  if (opts.prependToPath) {
-    cmd += `@SET PATH="${opts.prependToPath}:%PATH%"\r\n`
+  if (prependToPath) {
+    cmd += `@SET "PATH=${prependToPath}:%PATH%"\r\n`
   }
   if (nodePath) {
       cmd += `\
