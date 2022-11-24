@@ -104,7 +104,7 @@ import {promisify} from 'util'
 import path = require('path')
 import isWindows = require('is-windows')
 import CMD_EXTENSION = require('cmd-extension')
-const shebangExpr = /^#!\s*(?:\/usr\/bin\/env)?\s*([^ \t]+)(.*)$/
+const shebangExpr = /^#!\s*(?:\/usr\/bin\/env(?:\s+-S\s*)?)?\s*([^ \t]+)(.*)$/
 const DEFAULT_OPTIONS = {
   // Create PowerShell file by default if the option hasn't been specified
   createPwshFile: true,
