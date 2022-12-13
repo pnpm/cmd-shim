@@ -23,7 +23,8 @@ const fixtureFiles = {
     'src.env': '#!/usr/bin/env node\nconsole.log(/hi/)\n',
     'src.env.args': '#!/usr/bin/env node --expose_gc\ngc()\n',
     'src.sh': '#!/usr/bin/sh\necho hi\n',
-    'src.sh.args': '#!/usr/bin/sh -x\necho hi\n'
+    'src.sh.args': '#!/usr/bin/sh -x\necho hi\n',
+    'from.env.S': '#!/usr/bin/env -S node --expose_gc\ngc()\n'
   },
   [fixtures2]: {
     'src.sh.args': '#!/usr/bin/sh -x\necho hi\n'

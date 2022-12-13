@@ -735,3 +735,62 @@ if ($MyInvocation.ExpectingInput) {
 exit $LASTEXITCODE
 "
 `;
+
+exports[`shebang with -S from.env.S.shim 1`] = `
+"#!/bin/sh
+basedir=$(dirname \\"$(echo \\"$0\\" | sed -e 's,\\\\\\\\,/,g')\\")
+
+case \`uname\` in
+    *CYGWIN*) basedir=\`cygpath -w \\"$basedir\\"\`;;
+esac
+
+if [ -x \\"$basedir/node\\" ]; then
+  exec \\"$basedir/node\\"  --expose_gc \\"$basedir/from.env.S\\" \\"$@\\"
+else
+  exec node  --expose_gc \\"$basedir/from.env.S\\" \\"$@\\"
+fi
+"
+`;
+
+exports[`shebang with -S from.env.S.shim.cmd 1`] = `
+"@SETLOCAL
+@IF EXIST \\"%~dp0\\\\node.exe\\" (
+  \\"%~dp0\\\\node.exe\\"  --expose_gc \\"%~dp0\\\\from.env.S\\" %*
+) ELSE (
+  @SET PATHEXT=%PATHEXT:;.JS;=;%
+  node  --expose_gc \\"%~dp0\\\\from.env.S\\" %*
+)
+"
+`;
+
+exports[`shebang with -S from.env.S.shim.ps1 1`] = `
+"#!/usr/bin/env pwsh
+$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
+
+$exe=\\"\\"
+if ($PSVersionTable.PSVersion -lt \\"6.0\\" -or $IsWindows) {
+  # Fix case when both the Windows and Linux builds of Node
+  # are installed in the same directory
+  $exe=\\".exe\\"
+}
+$ret=0
+if (Test-Path \\"$basedir/node$exe\\") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & \\"$basedir/node$exe\\"  --expose_gc \\"$basedir/from.env.S\\" $args
+  } else {
+    & \\"$basedir/node$exe\\"  --expose_gc \\"$basedir/from.env.S\\" $args
+  }
+  $ret=$LASTEXITCODE
+} else {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & \\"node$exe\\"  --expose_gc \\"$basedir/from.env.S\\" $args
+  } else {
+    & \\"node$exe\\"  --expose_gc \\"$basedir/from.env.S\\" $args
+  }
+  $ret=$LASTEXITCODE
+}
+exit $ret
+"
+`;
