@@ -178,3 +178,15 @@ testOnWindows('explicit shebang with args, linking to another drive on Windows',
   testFile(`${to}.cmd`, '\r\n')
   testFile(`${to}.ps1`)
 })
+
+describe('shebang with -S', () => {
+  const src = path.resolve(fixtures, 'from.env.S')
+  const to = path.resolve(fixtures, 'from.env.S.shim')
+  beforeAll(() => {
+    return cmdShim(src, to, { createCmdFile: true, fs })
+  })
+
+  testFile(to)
+  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.ps1`)
+})
