@@ -109,7 +109,7 @@ const DEFAULT_OPTIONS = {
   // Create PowerShell file by default if the option hasn't been specified
   createPwshFile: true,
   createCmdFile: isWindows(),
-  fs: require('fs')
+  fs: require('graceful-fs')
 }
 /**
  * Map from extensions of files that this module is frequently used for to their runtime.
