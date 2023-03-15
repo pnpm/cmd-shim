@@ -382,7 +382,7 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
 @IF NOT DEFINED NODE_PATH (\r
   @SET "NODE_PATH=${nodePath}"\r
 ) ELSE (\r
-  @SET "NODE_PATH=%NODE_PATH%;${nodePath}"\r
+  @SET "NODE_PATH=${nodePath};%NODE_PATH%"\r
 )\r
 `
   }
@@ -467,7 +467,7 @@ export PATH="${opts.prependToPath}:$PATH"
 if [ -z "$NODE_PATH" ]; then
   export NODE_PATH="${shNodePath}"
 else
-  export NODE_PATH="$NODE_PATH:${shNodePath}"
+  export NODE_PATH="${shNodePath}:$NODE_PATH"
 fi
 `
   }
@@ -588,7 +588,7 @@ ${shPrependPath ? `  $prepend_path="${shPrependPath}"\n` : ''}\
 if ([string]::IsNullOrEmpty($env_node_path)) {
   $env:NODE_PATH=$new_node_path
 } else {
-  $env:NODE_PATH="$env_node_path$pathsep$new_node_path"
+  $env:NODE_PATH="$new_node_path$pathsep$env_node_path"
 }
 `
   }
