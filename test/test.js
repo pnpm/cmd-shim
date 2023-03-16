@@ -41,7 +41,7 @@ describe('no shebang', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -53,7 +53,7 @@ describe('env shebang', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -65,7 +65,7 @@ describe('env shebang with PATH extending', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -77,7 +77,7 @@ describe('env shebang with NODE_PATH', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -89,7 +89,7 @@ describe('env shebang with no NODE_PATH', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -101,7 +101,7 @@ describe('env shebang with default args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -113,7 +113,7 @@ describe('env shebang with args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -125,7 +125,7 @@ describe('explicit shebang', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -137,7 +137,7 @@ describe('explicit shebang with args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -149,7 +149,7 @@ describe('explicit shebang with prog args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -161,7 +161,7 @@ describe('custom node executable', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -175,7 +175,7 @@ testOnWindows('explicit shebang with args, linking to another drive on Windows',
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -187,6 +187,6 @@ describe('shebang with -S', () => {
   })
 
   testFile(to)
-  testFile(`${to}.cmd`, '\r\n')
+  testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })

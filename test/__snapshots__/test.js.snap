@@ -13,7 +13,7 @@ exit $?
 "
 `;
 
-exports[`custom node executable env.shim.cmd 1`] = `
+exports[`custom node executable env.shim.CMD 1`] = `
 "@SETLOCAL
 @\\"/.pnpm/nodejs/16.0.0/node\\"  \\"%~dp0\\\\src.env\\" %*
 "
@@ -55,7 +55,7 @@ fi
 "
 `;
 
-exports[`env shebang env.shim.cmd 1`] = `
+exports[`env shebang env.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\node.exe\\" (
   \\"%~dp0\\\\node.exe\\"  \\"%~dp0\\\\src.env\\" %*
@@ -119,12 +119,12 @@ fi
 "
 `;
 
-exports[`env shebang with NODE_PATH env.shim.cmd 1`] = `
+exports[`env shebang with NODE_PATH env.shim.CMD 1`] = `
 "@SETLOCAL
 @IF NOT DEFINED NODE_PATH (
   @SET \\"NODE_PATH=\\\\john\\\\src\\\\node_modules;\\\\bin\\\\node\\\\node_modules\\"
 ) ELSE (
-  @SET \\"NODE_PATH=%NODE_PATH%;\\\\john\\\\src\\\\node_modules;\\\\bin\\\\node\\\\node_modules\\"
+  @SET \\"NODE_PATH=\\\\john\\\\src\\\\node_modules;\\\\bin\\\\node\\\\node_modules;%NODE_PATH%\\"
 )
 @IF EXIST \\"%~dp0\\\\node.exe\\" (
   \\"%~dp0\\\\node.exe\\"  \\"%~dp0\\\\src.env\\" %*
@@ -197,7 +197,7 @@ fi
 "
 `;
 
-exports[`env shebang with PATH extending env.shim.cmd 1`] = `
+exports[`env shebang with PATH extending env.shim.CMD 1`] = `
 "@SETLOCAL
 @SET \\"PATH=\\\\add-to-path:%PATH%\\"
 @IF EXIST \\"%~dp0\\\\node.exe\\" (
@@ -267,7 +267,7 @@ fi
 "
 `;
 
-exports[`env shebang with args env.args.shim.cmd 1`] = `
+exports[`env shebang with args env.args.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\node.exe\\" (
   \\"%~dp0\\\\node.exe\\"  --expose_gc \\"%~dp0\\\\src.env.args\\" %*
@@ -326,7 +326,7 @@ fi
 "
 `;
 
-exports[`env shebang with default args env.shim.cmd 1`] = `
+exports[`env shebang with default args env.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\node.exe\\" (
   \\"%~dp0\\\\node.exe\\" --preserve-symlinks \\"%~dp0\\\\src.env\\" %*
@@ -385,7 +385,7 @@ fi
 "
 `;
 
-exports[`env shebang with no NODE_PATH env.shim.cmd 1`] = `
+exports[`env shebang with no NODE_PATH env.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\node.exe\\" (
   \\"%~dp0\\\\node.exe\\"  \\"%~dp0\\\\src.env\\" %*
@@ -444,7 +444,7 @@ fi
 "
 `;
 
-exports[`explicit shebang sh.shim.cmd 1`] = `
+exports[`explicit shebang sh.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\/usr/bin/sh.exe\\" (
   \\"%~dp0\\\\/usr/bin/sh.exe\\"  \\"%~dp0\\\\src.sh\\" %*
@@ -503,7 +503,7 @@ fi
 "
 `;
 
-exports[`explicit shebang with args sh.args.shim.cmd 1`] = `
+exports[`explicit shebang with args sh.args.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\/usr/bin/sh.exe\\" (
   \\"%~dp0\\\\/usr/bin/sh.exe\\"  -x \\"%~dp0\\\\src.sh.args\\" %*
@@ -562,7 +562,7 @@ fi
 "
 `;
 
-exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.cmd 1`] = `
+exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\/usr/bin/sh.exe\\" (
   \\"%~dp0\\\\/usr/bin/sh.exe\\"  -x \\"J:\\\\cmd-shim\\\\fixtures\\\\src.sh.args\\" %*
@@ -621,7 +621,7 @@ fi
 "
 `;
 
-exports[`explicit shebang with prog args sh.args.shim.cmd 1`] = `
+exports[`explicit shebang with prog args sh.args.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\/usr/bin/sh.exe\\" (
   \\"%~dp0\\\\/usr/bin/sh.exe\\"  -x \\"%~dp0\\\\src.sh.args\\" hello %*
@@ -710,7 +710,7 @@ exit $?
 "
 `;
 
-exports[`no shebang exe.shim.cmd 1`] = `
+exports[`no shebang exe.shim.CMD 1`] = `
 "@SETLOCAL
 @\\"%~dp0\\\\src.exe\\"   %*
 "
@@ -752,7 +752,7 @@ fi
 "
 `;
 
-exports[`shebang with -S from.env.S.shim.cmd 1`] = `
+exports[`shebang with -S from.env.S.shim.CMD 1`] = `
 "@SETLOCAL
 @IF EXIST \\"%~dp0\\\\node.exe\\" (
   \\"%~dp0\\\\node.exe\\"  --expose_gc \\"%~dp0\\\\from.env.S\\" %*
