@@ -109,7 +109,7 @@ esac
 if [ -z \\"$NODE_PATH\\" ]; then
   export NODE_PATH=\\"/john/src/node_modules:/bin/node/node_modules\\"
 else
-  export NODE_PATH=\\"$NODE_PATH:/john/src/node_modules:/bin/node/node_modules\\"
+  export NODE_PATH=\\"/john/src/node_modules:/bin/node/node_modules:$NODE_PATH\\"
 fi
 if [ -x \\"$basedir/node\\" ]; then
   exec \\"$basedir/node\\"  \\"$basedir/src.env\\" \\"$@\\"
@@ -154,7 +154,7 @@ if ($PSVersionTable.PSVersion -lt \\"6.0\\" -or $IsWindows) {
 if ([string]::IsNullOrEmpty($env_node_path)) {
   $env:NODE_PATH=$new_node_path
 } else {
-  $env:NODE_PATH=\\"$env_node_path$pathsep$new_node_path\\"
+  $env:NODE_PATH=\\"$new_node_path$pathsep$env_node_path\\"
 }
 
 $ret=0
