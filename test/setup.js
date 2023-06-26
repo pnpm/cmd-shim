@@ -20,6 +20,7 @@ exports.fs = memfs
 const fixtureFiles = {
   [fixtures]: {
     'src.exe': 'exe',
+    'src.bat': 'bat',
     'src.env': '#!/usr/bin/env node\nconsole.log(/hi/)\n',
     'src.env.args': '#!/usr/bin/env node --expose_gc\ngc()\n',
     'src.sh': '#!/usr/bin/sh\necho hi\n',

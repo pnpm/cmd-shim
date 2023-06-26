@@ -190,3 +190,15 @@ describe('shebang with -S', () => {
   testFile(`${to}.CMD`, '\r\n')
   testFile(`${to}.ps1`)
 })
+
+describe('batch script', () => {
+  const src = path.resolve(fixtures, 'src.bat')
+  const to = path.resolve(fixtures, 'bat.shim')
+  beforeAll(() => {
+    return cmdShim(src, to, { createCmdFile: true, fs })
+  })
+
+  testFile(to)
+  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}.ps1`)
+})
