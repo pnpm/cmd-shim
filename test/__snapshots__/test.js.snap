@@ -5,7 +5,7 @@ exports[`custom node executable env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 "/.pnpm/nodejs/16.0.0/node"  "$basedir/src.env" "$@"
@@ -44,7 +44,7 @@ exports[`env shebang env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir/node" ]; then
@@ -103,7 +103,7 @@ exports[`env shebang with NODE_PATH env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -z "$NODE_PATH" ]; then
@@ -185,7 +185,7 @@ exports[`env shebang with PATH extending env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 export PATH="/add-to-path:$PATH"
@@ -256,7 +256,7 @@ exports[`env shebang with args env.args.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir/node" ]; then
@@ -315,7 +315,7 @@ exports[`env shebang with default args env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir/node" ]; then
@@ -374,7 +374,7 @@ exports[`env shebang with no NODE_PATH env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir/node" ]; then
@@ -433,7 +433,7 @@ exports[`explicit shebang sh.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir//usr/bin/sh" ]; then
@@ -492,7 +492,7 @@ exports[`explicit shebang with args sh.args.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir//usr/bin/sh" ]; then
@@ -551,7 +551,7 @@ exports[`explicit shebang with args, linking to another drive on Windows sh.args
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir//usr/bin/sh" ]; then
@@ -610,7 +610,7 @@ exports[`explicit shebang with prog args sh.args.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir//usr/bin/sh" ]; then
@@ -669,7 +669,7 @@ exports[`no cmd file exe.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 "$basedir/src.exe"   "$@"
@@ -702,7 +702,7 @@ exports[`no shebang exe.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 "$basedir/src.exe"   "$@"
@@ -741,7 +741,7 @@ exports[`shebang with -S from.env.S.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*) basedir=\`cygpath -w "$basedir"\`;;
 esac
 
 if [ -x "$basedir/node" ]; then
