@@ -440,7 +440,7 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   // case `uname` in
   //     *CYGWIN*|*MINGW*|*MSYS*)
   //         if command -v cygpath > /dev/null 2>&1; then
-  //             basedir=`cygpath -w "$basedir"`;;
+  //             basedir=`cygpath -w "$basedir"`
   //         fi
   //      ;;
   // esac
@@ -460,7 +460,7 @@ basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 case \`uname\` in
     *CYGWIN*|*MINGW*|*MSYS*)
         if command -v cygpath > /dev/null 2>&1; then
-            basedir=\`cygpath -w "$basedir"\`;;
+            basedir=\`cygpath -w "$basedir"\`
         fi
     ;;
 esac
