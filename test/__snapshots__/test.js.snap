@@ -1,5 +1,64 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`batch script bat.shim 1`] = `
+"#!/bin/sh
+basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+
+case \`uname\` in
+    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+esac
+
+if [ -x "$basedir/cmd" ]; then
+  exec "$basedir/cmd" /C "$basedir/src.bat" "$@"
+else
+  exec cmd /C "$basedir/src.bat" "$@"
+fi
+"
+`;
+
+exports[`batch script bat.shim.CMD 1`] = `
+"@SETLOCAL
+@IF EXIST "%~dp0\\cmd.exe" (
+  "%~dp0\\cmd.exe" /C "%~dp0\\src.bat" %*
+) ELSE (
+  @SET PATHEXT=%PATHEXT:;.JS;=;%
+  cmd /C "%~dp0\\src.bat" %*
+)
+"
+`;
+
+exports[`batch script bat.shim.ps1 1`] = `
+"#!/usr/bin/env pwsh
+$basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
+
+$exe=""
+if ($PSVersionTable.PSVersion -lt "6.0" -or $IsWindows) {
+  # Fix case when both the Windows and Linux builds of Node
+  # are installed in the same directory
+  $exe=".exe"
+}
+$ret=0
+if (Test-Path "$basedir/cmd$exe") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/cmd$exe" /C "$basedir/src.bat" $args
+  } else {
+    & "$basedir/cmd$exe" /C "$basedir/src.bat" $args
+  }
+  $ret=$LASTEXITCODE
+} else {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "cmd$exe" /C "$basedir/src.bat" $args
+  } else {
+    & "cmd$exe" /C "$basedir/src.bat" $args
+  }
+  $ret=$LASTEXITCODE
+}
+exit $ret
+"
+`;
+
 exports[`custom node executable env.shim 1`] = `
 "#!/bin/sh
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")

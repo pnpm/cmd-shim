@@ -275,10 +275,13 @@ async function searchScriptRuntime (target: string, opts: InternalOptions): Prom
       // If the inference fails, it's something that'll be compiled, or some other
       // sort of script, and just call it directly.
       const targetExtension = path.extname(target).toLowerCase()
+      // undefined if extension is unknown but it's converted to null.
+      const program = extensionToProgramMap.get(targetExtension) || null
+      // CMD requires executing batch files with the `/C` flag
+      const additionalArgs = program === 'cmd' ? '/C' : ''
       return {
-        // undefined if extension is unknown but it's converted to null.
-        program: extensionToProgramMap.get(targetExtension) || null,
-        additionalArgs: ''
+        program,
+        additionalArgs
       }
     }
     return {
