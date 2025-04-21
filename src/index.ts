@@ -103,6 +103,7 @@ import {promisify} from 'util'
 
 import path = require('path')
 import isWindows = require('is-windows')
+const isCygwin = () => isWindows() && (process.env.TERM === 'CYGWIN' || process.env.MSYSTEM !== undefined)
 import CMD_EXTENSION = require('cmd-extension')
 const shebangExpr = /^#!\s*(?:\/usr\/bin\/env(?:\s+-S\s*)?)?\s*([^ \t]+)(.*)$/
 const DEFAULT_OPTIONS = {
@@ -437,7 +438,11 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   // basedir=`dirname "$0"`
   //
   // case `uname` in
-  //     *CYGWIN*) basedir=`cygpath -w "$basedir"`;;
+  //     *CYGWIN*|*MINGW*|*MSYS*)
+  //         if command -v cygpath > /dev/null 2>&1; then
+  //             basedir=`cygpath -w "$basedir"`
+  //         fi
+  //      ;;
   // esac
   //
   // export NODE_PATH="<nodepath>"
@@ -453,7 +458,11 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*)
+        if command -v cygpath > /dev/null 2>&1; then
+            basedir=\`cygpath -w "$basedir"\`
+        fi
+    ;;
 esac
 
 `
@@ -663,7 +672,7 @@ function normalizePathEnvVar (nodePath: undefined | string | string[]): Normaliz
   let result = {} as NormalizedPathEnvVar
   for (let i = 0; i < split.length; i++) {
     const win32 = split[i].split('/').join('\\')
-    const posix = isWindows() ? split[i].split('\\').join('/').replace(/^([^:\\/]*):/, (_, $1) => `/mnt/${$1.toLowerCase()}`) : split[i]
+    const posix = isWindows() ? split[i].split('\\').join('/').replace(/^([^:\\/]*):/, (_, $1) => `${isCygwin() ? '/proc/cygdrive' : '/mnt'}/${$1.toLowerCase()}`) : split[i]
 
     result.win32 = result.win32 ? `${result.win32};${win32}` : win32
     result.posix = result.posix ? `${result.posix}:${posix}` : posix
