@@ -1,6 +1,7 @@
 
 'use strict'
 const path = require('path')
+const cmdExtension = require('cmd-extension')
 const { fixtures, fixtures2, fs } = require('./setup')
 
 const cmdShim = require('../')
@@ -10,7 +11,7 @@ const cmdShim = require('../')
  * @param {'\n' | '\r\n'} lineEnding
  */
 function testFile (fileName, lineEnding = '\n') {
-  test(path.basename(fileName), async () => {
+  test(path.basename(fileName).toLowerCase(), async () => {
     const invalidLineEnding = lineEnding === '\r\n' ? /$(?<!\r)\n/ugm : /$\r\n/ugm
     const content = await fs.promises.readFile(fileName, 'utf8')
 
@@ -41,7 +42,7 @@ describe('no shebang', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -53,7 +54,7 @@ describe('env shebang', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -65,7 +66,7 @@ describe('env shebang with PATH extending', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -77,7 +78,7 @@ describe('env shebang with NODE_PATH', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -89,7 +90,7 @@ describe('env shebang with no NODE_PATH', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -101,7 +102,7 @@ describe('env shebang with default args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -113,7 +114,7 @@ describe('env shebang with args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -125,7 +126,7 @@ describe('explicit shebang', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -137,7 +138,7 @@ describe('explicit shebang with args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -149,7 +150,7 @@ describe('explicit shebang with prog args', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -161,7 +162,7 @@ describe('custom node executable', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -175,7 +176,7 @@ testOnWindows('explicit shebang with args, linking to another drive on Windows',
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
 
@@ -187,6 +188,6 @@ describe('shebang with -S', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })
