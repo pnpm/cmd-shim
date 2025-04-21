@@ -200,6 +200,6 @@ describe('batch script', () => {
   })
 
   testFile(to)
-  testFile(`${to}.CMD`, '\r\n')
+  testFile(`${to}${cmdExtension}`, '\r\n')
   testFile(`${to}.ps1`)
 })

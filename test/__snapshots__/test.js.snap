@@ -5,7 +5,11 @@ exports[`batch script bat.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
-    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+    *CYGWIN*|*MINGW*|*MSYS*)
+        if command -v cygpath > /dev/null 2>&1; then
+            basedir=\`cygpath -w "$basedir"\`
+        fi
+    ;;
 esac
 
 if [ -x "$basedir/cmd" ]; then
@@ -16,7 +20,7 @@ fi
 "
 `;
 
-exports[`batch script bat.shim.CMD 1`] = `
+exports[`batch script bat.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\cmd.exe" (
   "%~dp0\\cmd.exe" /C "%~dp0\\src.bat" %*
