@@ -788,6 +788,22 @@ exit $LASTEXITCODE
 "
 `;
 
+exports[`no src file missing.shim 1`] = `
+"#!/bin/sh
+basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+
+case \`uname\` in
+    *CYGWIN*) basedir=\`cygpath -w "$basedir"\`;;
+esac
+
+if [ -x "$basedir/node" ]; then
+  exec "$basedir/node"  "$basedir/missing.js" "$@"
+else
+  exec node  "$basedir/missing.js" "$@"
+fi
+"
+`;
+
 exports[`shebang with -S from.env.S.shim 1`] = `
 "#!/bin/sh
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")

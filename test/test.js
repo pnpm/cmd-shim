@@ -19,6 +19,17 @@ function testFile (fileName, lineEnding = '\n') {
   })
 }
 
+describe('no src file', () => {
+  const src = path.resolve(fixtures, 'missing.js')
+  const to = path.resolve(fixtures, 'missing.shim')
+
+  beforeAll(() => {
+    return cmdShim(src, to, { createCmdFile: false, fs })
+  })
+
+  testFile(to)
+})
+
 describe('no cmd file', () => {
   const src = path.resolve(fixtures, 'src.exe')
   const to = path.resolve(fixtures, 'exe.shim')
