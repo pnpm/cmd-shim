@@ -61,5 +61,5 @@
   "jest": {
     "testEnvironment": "node"
   },
-  "packageManager": "pnpm@10.10.0"
+  "packageManager": "pnpm@10.13.1"
 }
