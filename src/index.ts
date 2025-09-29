@@ -458,7 +458,7 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
 
   let sh = `\
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+basedir=$(dirname "$(realpath "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
     *CYGWIN*|*MINGW*|*MSYS*)
