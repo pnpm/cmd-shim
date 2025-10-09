@@ -458,13 +458,29 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
 
   let sh = `\
 #!/bin/sh
-basedir=$(dirname "$(realpath "$0" | sed -e 's,\\\\,/,g')")
+basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 
 case \`uname\` in
     *CYGWIN*|*MINGW*|*MSYS*)
         if command -v cygpath > /dev/null 2>&1; then
             basedir=\`cygpath -w "$basedir"\`
         fi
+    ;;
+    *)
+      if command -v realpath >/dev/null 2>&1; then
+          basedir=\`realpath "$basedir"\`
+      elif command -v readlink >/dev/null 2>&1; then
+          # some systems has the readlink, but doesn't have "-f" flag
+          if readlink -f "$basedir" >/dev/null 2>&1; then
+               basedir=\`readlink -f "$basedir"\`
+          else
+               basedir=\`readlink "$basedir"\`
+          fi
+      elif command -v perl >/dev/null 2>&1; then
+          basedir=\`perl -e 'use Cwd "abs_path"; print abs_path(shift)' "$basedir"\`
+      elif [[ $basedir != /* ]]; then
+          basedir="$PWD/\${basedir#./}"
+      fi
     ;;
 esac
 
