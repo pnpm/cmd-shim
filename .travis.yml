@@ -1,8 +1,0 @@
-language: node_js
-node_js:
-  - '22'
-  - '24'
-before_install:
-  - curl -L https://unpkg.com/@pnpm/self-installer | node
-install:
-  - pnpm install
