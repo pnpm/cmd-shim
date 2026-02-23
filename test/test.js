@@ -13,9 +13,13 @@ const cmdShim = require('../')
 function testFile (fileName, lineEnding = '\n') {
   test(path.basename(fileName).toLowerCase(), async () => {
     const invalidLineEnding = lineEnding === '\r\n' ? /$(?<!\r)\n/ugm : /$\r\n/ugm
-    const content = await fs.promises.readFile(fileName, 'utf8')
+    let content = await fs.promises.readFile(fileName, 'utf8')
 
     expect(content).not.toMatch(invalidLineEnding)
+    // Normalize cmd extension casing for cross-platform snapshot consistency
+    if (cmdExtension !== '.cmd') {
+      content = content.replaceAll(cmdExtension, '.cmd')
+    }
     expect(content).toMatchSnapshot()
   })
 }

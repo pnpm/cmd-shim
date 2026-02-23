@@ -664,7 +664,7 @@ else
 fi
 `;
 
-exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.CMD 1`] = `
+exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\/usr/bin/sh.exe" (
   "%~dp0\\/usr/bin/sh.exe"  -x "J:\\cmd-shim\\fixtures\\src.sh.args" %*
