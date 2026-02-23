@@ -752,6 +752,20 @@ if [ -x "$basedir//usr/bin/sh" ]; then
 else
   exec /usr/bin/sh  -x "J:/cmd-shim/fixtures/src.sh.args" "$@"
 fi
+"
+`;
+
+exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.cmd 1`] = `
+"@SETLOCAL
+@IF EXIST "%~dp0\\/usr/bin/sh.exe" (
+  "%~dp0\\/usr/bin/sh.exe"  -x "J:\\cmd-shim\\fixtures\\src.sh.args" %*
+) ELSE IF EXIST "%~dp0\\/usr/bin/sh.cmd" (
+  "%~dp0\\/usr/bin/sh.cmd"  -x "J:\\cmd-shim\\fixtures\\src.sh.args" %*
+) ELSE (
+  @SET PATHEXT=%PATHEXT:;.JS;=;%
+  /usr/bin/sh  -x "J:\\cmd-shim\\fixtures\\src.sh.args" %*
+)
+"
 `;
 
 exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.ps1 1`] = `
@@ -771,6 +785,14 @@ if (Test-Path "$basedir//usr/bin/sh$exe") {
     $input | & "$basedir//usr/bin/sh$exe"  -x "J:/cmd-shim/fixtures/src.sh.args" $args
   } else {
     & "$basedir//usr/bin/sh$exe"  -x "J:/cmd-shim/fixtures/src.sh.args" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir//usr/bin/sh.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir//usr/bin/sh.cmd"  -x "J:/cmd-shim/fixtures/src.sh.args" $args
+  } else {
+    & "$basedir//usr/bin/sh.cmd"  -x "J:/cmd-shim/fixtures/src.sh.args" $args
   }
   $ret=$LASTEXITCODE
 } else {
