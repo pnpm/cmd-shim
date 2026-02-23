@@ -391,9 +391,12 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
 `
   }
   if (longProg) {
+    const longProgCmd = `"%~dp0\\${opts.prog}${CMD_EXTENSION}"`
     cmd += `\
 @IF EXIST ${longProg} (\r
   ${longProg} ${args} ${target} ${progArgs}%*\r
+) ELSE IF EXIST ${longProgCmd} (\r
+  ${longProgCmd} ${args} ${target} ${progArgs}%*\r
 ) ELSE (\r
   @SET PATHEXT=%PATHEXT:;.JS;=;%\r
   ${prog} ${args} ${target} ${progArgs}%*\r
@@ -610,6 +613,7 @@ $env:PATH="$prepend_path$pathsep$env:PATH"
 `
   }
   if (pwshLongProg) {
+    const pwshLongProgCmd = `"$basedir/${opts.prog}${CMD_EXTENSION}"`
     pwsh += `
 $ret=0
 if (Test-Path ${pwshLongProg}) {
@@ -618,6 +622,14 @@ if (Test-Path ${pwshLongProg}) {
     $input | & ${pwshLongProg} ${args} ${shTarget} ${progArgs}$args
   } else {
     & ${pwshLongProg} ${args} ${shTarget} ${progArgs}$args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path ${pwshLongProgCmd}) {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & ${pwshLongProgCmd} ${args} ${shTarget} ${progArgs}$args
+  } else {
+    & ${pwshLongProgCmd} ${args} ${shTarget} ${progArgs}$args
   }
   $ret=$LASTEXITCODE
 } else {
