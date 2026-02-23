@@ -662,6 +662,7 @@ if [ -x "$basedir//usr/bin/sh" ]; then
 else
   exec /usr/bin/sh  -x "J:/cmd-shim/fixtures/src.sh.args" "$@"
 fi
+"
 `;
 
 exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.cmd 1`] = `
