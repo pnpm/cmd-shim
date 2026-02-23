@@ -24,6 +24,8 @@ exports[`batch script bat.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\cmd.exe" (
   "%~dp0\\cmd.exe" /C "%~dp0\\src.bat" %*
+) ELSE IF EXIST "%~dp0\\cmd.cmd" (
+  "%~dp0\\cmd.cmd" /C "%~dp0\\src.bat" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   cmd /C "%~dp0\\src.bat" %*
@@ -48,6 +50,14 @@ if (Test-Path "$basedir/cmd$exe") {
     $input | & "$basedir/cmd$exe" /C "$basedir/src.bat" $args
   } else {
     & "$basedir/cmd$exe" /C "$basedir/src.bat" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/cmd.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/cmd.cmd" /C "$basedir/src.bat" $args
+  } else {
+    & "$basedir/cmd.cmd" /C "$basedir/src.bat" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -130,6 +140,8 @@ exports[`env shebang env.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\node.exe" (
   "%~dp0\\node.exe"  "%~dp0\\src.env" %*
+) ELSE IF EXIST "%~dp0\\node.cmd" (
+  "%~dp0\\node.cmd"  "%~dp0\\src.env" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   node  "%~dp0\\src.env" %*
@@ -154,6 +166,14 @@ if (Test-Path "$basedir/node$exe") {
     $input | & "$basedir/node$exe"  "$basedir/src.env" $args
   } else {
     & "$basedir/node$exe"  "$basedir/src.env" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/node.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/node.cmd"  "$basedir/src.env" $args
+  } else {
+    & "$basedir/node.cmd"  "$basedir/src.env" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -203,6 +223,8 @@ exports[`env shebang with NODE_PATH env.shim.cmd 1`] = `
 )
 @IF EXIST "%~dp0\\node.exe" (
   "%~dp0\\node.exe"  "%~dp0\\src.env" %*
+) ELSE IF EXIST "%~dp0\\node.cmd" (
+  "%~dp0\\node.cmd"  "%~dp0\\src.env" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   node  "%~dp0\\src.env" %*
@@ -239,6 +261,14 @@ if (Test-Path "$basedir/node$exe") {
     $input | & "$basedir/node$exe"  "$basedir/src.env" $args
   } else {
     & "$basedir/node$exe"  "$basedir/src.env" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/node.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/node.cmd"  "$basedir/src.env" $args
+  } else {
+    & "$basedir/node.cmd"  "$basedir/src.env" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -281,6 +311,8 @@ exports[`env shebang with PATH extending env.shim.cmd 1`] = `
 @SET "PATH=\\add-to-path:%PATH%"
 @IF EXIST "%~dp0\\node.exe" (
   "%~dp0\\node.exe"  "%~dp0\\src.env" %*
+) ELSE IF EXIST "%~dp0\\node.cmd" (
+  "%~dp0\\node.cmd"  "%~dp0\\src.env" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   node  "%~dp0\\src.env" %*
@@ -314,6 +346,14 @@ if (Test-Path "$basedir/node$exe") {
     $input | & "$basedir/node$exe"  "$basedir/src.env" $args
   } else {
     & "$basedir/node$exe"  "$basedir/src.env" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/node.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/node.cmd"  "$basedir/src.env" $args
+  } else {
+    & "$basedir/node.cmd"  "$basedir/src.env" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -354,6 +394,8 @@ exports[`env shebang with args env.args.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\node.exe" (
   "%~dp0\\node.exe"  --expose_gc "%~dp0\\src.env.args" %*
+) ELSE IF EXIST "%~dp0\\node.cmd" (
+  "%~dp0\\node.cmd"  --expose_gc "%~dp0\\src.env.args" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   node  --expose_gc "%~dp0\\src.env.args" %*
@@ -378,6 +420,14 @@ if (Test-Path "$basedir/node$exe") {
     $input | & "$basedir/node$exe"  --expose_gc "$basedir/src.env.args" $args
   } else {
     & "$basedir/node$exe"  --expose_gc "$basedir/src.env.args" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/node.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/node.cmd"  --expose_gc "$basedir/src.env.args" $args
+  } else {
+    & "$basedir/node.cmd"  --expose_gc "$basedir/src.env.args" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -417,6 +467,8 @@ exports[`env shebang with default args env.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\node.exe" (
   "%~dp0\\node.exe" --preserve-symlinks "%~dp0\\src.env" %*
+) ELSE IF EXIST "%~dp0\\node.cmd" (
+  "%~dp0\\node.cmd" --preserve-symlinks "%~dp0\\src.env" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   node --preserve-symlinks "%~dp0\\src.env" %*
@@ -441,6 +493,14 @@ if (Test-Path "$basedir/node$exe") {
     $input | & "$basedir/node$exe" --preserve-symlinks "$basedir/src.env" $args
   } else {
     & "$basedir/node$exe" --preserve-symlinks "$basedir/src.env" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/node.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/node.cmd" --preserve-symlinks "$basedir/src.env" $args
+  } else {
+    & "$basedir/node.cmd" --preserve-symlinks "$basedir/src.env" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -480,6 +540,8 @@ exports[`env shebang with no NODE_PATH env.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\node.exe" (
   "%~dp0\\node.exe"  "%~dp0\\src.env" %*
+) ELSE IF EXIST "%~dp0\\node.cmd" (
+  "%~dp0\\node.cmd"  "%~dp0\\src.env" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   node  "%~dp0\\src.env" %*
@@ -504,6 +566,14 @@ if (Test-Path "$basedir/node$exe") {
     $input | & "$basedir/node$exe"  "$basedir/src.env" $args
   } else {
     & "$basedir/node$exe"  "$basedir/src.env" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/node.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/node.cmd"  "$basedir/src.env" $args
+  } else {
+    & "$basedir/node.cmd"  "$basedir/src.env" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -543,6 +613,8 @@ exports[`explicit shebang sh.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\/usr/bin/sh.exe" (
   "%~dp0\\/usr/bin/sh.exe"  "%~dp0\\src.sh" %*
+) ELSE IF EXIST "%~dp0\\/usr/bin/sh.cmd" (
+  "%~dp0\\/usr/bin/sh.cmd"  "%~dp0\\src.sh" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   /usr/bin/sh  "%~dp0\\src.sh" %*
@@ -567,6 +639,14 @@ if (Test-Path "$basedir//usr/bin/sh$exe") {
     $input | & "$basedir//usr/bin/sh$exe"  "$basedir/src.sh" $args
   } else {
     & "$basedir//usr/bin/sh$exe"  "$basedir/src.sh" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir//usr/bin/sh.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir//usr/bin/sh.cmd"  "$basedir/src.sh" $args
+  } else {
+    & "$basedir//usr/bin/sh.cmd"  "$basedir/src.sh" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -606,6 +686,8 @@ exports[`explicit shebang with args sh.args.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\/usr/bin/sh.exe" (
   "%~dp0\\/usr/bin/sh.exe"  -x "%~dp0\\src.sh.args" %*
+) ELSE IF EXIST "%~dp0\\/usr/bin/sh.cmd" (
+  "%~dp0\\/usr/bin/sh.cmd"  -x "%~dp0\\src.sh.args" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   /usr/bin/sh  -x "%~dp0\\src.sh.args" %*
@@ -630,6 +712,14 @@ if (Test-Path "$basedir//usr/bin/sh$exe") {
     $input | & "$basedir//usr/bin/sh$exe"  -x "$basedir/src.sh.args" $args
   } else {
     & "$basedir//usr/bin/sh$exe"  -x "$basedir/src.sh.args" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir//usr/bin/sh.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir//usr/bin/sh.cmd"  -x "$basedir/src.sh.args" $args
+  } else {
+    & "$basedir//usr/bin/sh.cmd"  -x "$basedir/src.sh.args" $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -662,17 +752,6 @@ if [ -x "$basedir//usr/bin/sh" ]; then
 else
   exec /usr/bin/sh  -x "J:/cmd-shim/fixtures/src.sh.args" "$@"
 fi
-`;
-
-exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.CMD 1`] = `
-"@SETLOCAL
-@IF EXIST "%~dp0\\/usr/bin/sh.exe" (
-  "%~dp0\\/usr/bin/sh.exe"  -x "J:\\cmd-shim\\fixtures\\src.sh.args" %*
-) ELSE (
-  @SET PATHEXT=%PATHEXT:;.JS;=;%
-  /usr/bin/sh  -x "J:\\cmd-shim\\fixtures\\src.sh.args" %*
-)
-"
 `;
 
 exports[`explicit shebang with args, linking to another drive on Windows sh.args.shim.ps1 1`] = `
@@ -731,6 +810,8 @@ exports[`explicit shebang with prog args sh.args.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\/usr/bin/sh.exe" (
   "%~dp0\\/usr/bin/sh.exe"  -x "%~dp0\\src.sh.args" hello %*
+) ELSE IF EXIST "%~dp0\\/usr/bin/sh.cmd" (
+  "%~dp0\\/usr/bin/sh.cmd"  -x "%~dp0\\src.sh.args" hello %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   /usr/bin/sh  -x "%~dp0\\src.sh.args" hello %*
@@ -755,6 +836,14 @@ if (Test-Path "$basedir//usr/bin/sh$exe") {
     $input | & "$basedir//usr/bin/sh$exe"  -x "$basedir/src.sh.args" hello $args
   } else {
     & "$basedir//usr/bin/sh$exe"  -x "$basedir/src.sh.args" hello $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir//usr/bin/sh.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir//usr/bin/sh.cmd"  -x "$basedir/src.sh.args" hello $args
+  } else {
+    & "$basedir//usr/bin/sh.cmd"  -x "$basedir/src.sh.args" hello $args
   }
   $ret=$LASTEXITCODE
 } else {
@@ -874,6 +963,8 @@ exports[`shebang with -S from.env.s.shim.cmd 1`] = `
 "@SETLOCAL
 @IF EXIST "%~dp0\\node.exe" (
   "%~dp0\\node.exe"  --expose_gc "%~dp0\\from.env.S" %*
+) ELSE IF EXIST "%~dp0\\node.cmd" (
+  "%~dp0\\node.cmd"  --expose_gc "%~dp0\\from.env.S" %*
 ) ELSE (
   @SET PATHEXT=%PATHEXT:;.JS;=;%
   node  --expose_gc "%~dp0\\from.env.S" %*
@@ -898,6 +989,14 @@ if (Test-Path "$basedir/node$exe") {
     $input | & "$basedir/node$exe"  --expose_gc "$basedir/from.env.S" $args
   } else {
     & "$basedir/node$exe"  --expose_gc "$basedir/from.env.S" $args
+  }
+  $ret=$LASTEXITCODE
+} elseif (Test-Path "$basedir/node.cmd") {
+  # Support pipeline input
+  if ($MyInvocation.ExpectingInput) {
+    $input | & "$basedir/node.cmd"  --expose_gc "$basedir/from.env.S" $args
+  } else {
+    & "$basedir/node.cmd"  --expose_gc "$basedir/from.env.S" $args
   }
   $ret=$LASTEXITCODE
 } else {
