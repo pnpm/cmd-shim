@@ -1,4 +1,3 @@
-'use strict'
 // On windows, create a .cmd file.
 // Read the #! in the file to see what it uses.  The vast majority
 // of the time, this will be either:
@@ -9,80 +8,76 @@
 // Write a binroot/pkg.bin + ".cmd" file that has this line in it:
 // @<prog> <args...> %~dp0<target> %*
 
-namespace cmdShim {
-  export interface Options {
-    /**
-     * If a PowerShell script should be created.
-     *
-     * @default true
-     */
-    createPwshFile?: boolean
+import fs from 'node:fs'
+import path from 'node:path'
+import CMD_EXTENSION from 'cmd-extension'
 
-    /**
-     * If a Windows Command Prompt script should be created.
-     *
-     * @default false
-     */
-    createCmdFile?: boolean
+export interface Options {
+  /**
+   * If a PowerShell script should be created.
+   *
+   * @default true
+   */
+  createPwshFile?: boolean
 
-    /**
-     * If symbolic links should be preserved.
-     *
-     * @default false
-     */
-    preserveSymlinks?: boolean
+  /**
+   * If a Windows Command Prompt script should be created.
+   *
+   * @default false
+   */
+  createCmdFile?: boolean
 
-    /**
-     * The path to the executable file.
-     */
-    prog?: string
+  /**
+   * If symbolic links should be preserved.
+   *
+   * @default false
+   */
+  preserveSymlinks?: boolean
 
-    /**
-     * The arguments to initialize the `node` process with.
-     */
-    args?: string
+  /**
+   * The path to the executable file.
+   */
+  prog?: string
 
-    /**
-     * The arguments to initialize the target process with, before the actual CLI arguments
-     */
-    progArgs?: string[]
+  /**
+   * The arguments to initialize the `node` process with.
+   */
+  args?: string
 
-    /**
-     * The value of the $NODE_PATH environment variable.
-     *
-     * The single `string` format is only kept for legacy compatibility,
-     * and the array form should be preferred.
-     */
-    nodePath?: string | string[]
+  /**
+   * The arguments to initialize the target process with, before the actual CLI arguments
+   */
+  progArgs?: string[]
 
-    /**
-     * fs implementation to use.  Must implement node's `fs` module interface.
-     */
-    fs?: typeof import('fs')
+  /**
+   * The value of the $NODE_PATH environment variable.
+   *
+   * The single `string` format is only kept for legacy compatibility,
+   * and the array form should be preferred.
+   */
+  nodePath?: string | string[]
 
-    /*
-     * Path to the Node.js executable
-     */
-    nodeExecPath?: string
+  /**
+   * fs implementation to use.  Must implement node's `fs` module interface.
+   */
+  fs?: typeof import('fs')
 
-    prependToPath?: string
-  }
+  /*
+   * Path to the Node.js executable
+   */
+  nodeExecPath?: string
+
+  prependToPath?: string
 }
-type Options = cmdShim.Options
-
-export = cmdShim
-cmdShim.ifExists = cmdShimIfExists
-cmdShim.isShimPointingAt = isShimPointingAt
 
 /**
  * @internal
  */
 type InternalOptions = Options & Required<Pick<Options, keyof typeof DEFAULT_OPTIONS>> & {
-  fs_: FsPromisified
+  fs_: FsPromises
 }
 
-type Fs_= Pick<typeof import('fs'), 'stat' | 'unlink' | 'readFile' | 'writeFile' | 'chmod' | 'mkdir'>
-type FsPromisified = {[K in keyof Fs_]: Fs_[K]['__promisify__']}
+type FsPromises = Pick<typeof fs.promises, 'chmod' | 'mkdir' | 'readFile' | 'stat' | 'unlink' | 'writeFile'>
 
 /**
  * Callback functions to generate scripts for shims.
@@ -100,18 +95,16 @@ interface ShimGenExtTuple {
   extension: string
 }
 
-import {promisify} from 'util'
+const isWindows = process.platform === 'win32'
+const isCygwin = () => isWindows && (process.env.TERM === 'CYGWIN' || process.env.MSYSTEM !== undefined)
 
-import path = require('path')
-import isWindows = require('is-windows')
-const isCygwin = () => isWindows() && (process.env.TERM === 'CYGWIN' || process.env.MSYSTEM !== undefined)
-import CMD_EXTENSION = require('cmd-extension')
+
 const shebangExpr = /^#!\s*(?:\/usr\/bin\/env(?:\s+-S\s*)?)?\s*([^ \t]+)(.*)$/
 const DEFAULT_OPTIONS = {
   // Create PowerShell file by default if the option hasn't been specified
   createPwshFile: true,
-  createCmdFile: isWindows(),
-  fs: require('graceful-fs')
+  createCmdFile: isWindows,
+  fs,
 }
 /**
  * Map from extensions of files that this module is frequently used for to their runtime.
@@ -129,15 +122,8 @@ const extensionToProgramMap = new Map([
 
 function ingestOptions (opts?: Options): InternalOptions {
   const opts_ = {...DEFAULT_OPTIONS, ...opts} as InternalOptions
-  const fs = opts_.fs
-  opts_.fs_ = {
-    chmod: fs.chmod ? promisify(fs.chmod) : (async () => { /* noop */ }) as any,
-    mkdir: promisify(fs.mkdir),
-    readFile: promisify(fs.readFile),
-    stat: promisify(fs.stat),
-    unlink: promisify(fs.unlink),
-    writeFile: promisify(fs.writeFile)
-  }
+  const fsImpl = opts_.fs
+  opts_.fs_ = fsImpl.promises
   return opts_
 }
 
@@ -150,7 +136,7 @@ function ingestOptions (opts?: Options): InternalOptions {
  * @param opts Options.
  * @throws If `src` is missing.
  */
-async function cmdShim (src: string, to: string, opts?: Options): Promise<void> {
+export async function cmdShim (src: string, to: string, opts?: Options): Promise<void> {
   const opts_ = ingestOptions(opts)
   await cmdShim_(src, to, opts_)
 }
@@ -165,8 +151,19 @@ async function cmdShim (src: string, to: string, opts?: Options): Promise<void> 
  * Don't add an extension if you will create multiple types of shims.
  * @param opts Options.
  */
-function cmdShimIfExists (src: string, to: string, opts?: Options): Promise<void> {
+export function cmdShimIfExists (src: string, to: string, opts?: Options): Promise<void> {
   return cmdShim(src, to, opts).catch(() => {})
+}
+
+/**
+ * Check whether a shim's content points at the given source path.
+ *
+ * @param shimContent The text content of the shim file.
+ * @param src The expected source path (the executable the shim should point to).
+ * @return `true` if the shim contains a matching target marker.
+ */
+export function isShimPointingAt (shimContent: string, src: string): boolean {
+  return shimContent.includes(`# ${shimTarget(src)}\n`)
 }
 
 /**
@@ -269,7 +266,7 @@ async function searchScriptRuntime (target: string, opts: InternalOptions): Prom
     const data = await opts.fs_.readFile(target, 'utf8')
 
     // First, check if the bin is a #! of some sort.
-    const firstLine = data.trim().split(/\r*\n/)[0]
+    const firstLine = (data as string).trim().split(/\r*\n/)[0]
     const shebang = firstLine.match(shebangExpr)
     if (!shebang) {
       // If not, infer script type from its extension.
@@ -290,7 +287,7 @@ async function searchScriptRuntime (target: string, opts: InternalOptions): Prom
       additionalArgs: shebang[2]
     }
   } catch (err: any) {
-    if (!isWindows() || err.code !== 'ENOENT') throw err
+    if (!isWindows || err.code !== 'ENOENT') throw err
     if (await opts.fs_.stat(`${target}${getExeExtension()}`)) {
       return {
         program: null,
@@ -680,7 +677,7 @@ function normalizePathEnvVar (nodePath: undefined | string | string[]): Normaliz
   let result = {} as NormalizedPathEnvVar
   for (let i = 0; i < split.length; i++) {
     const win32 = split[i].split('/').join('\\')
-    const posix = isWindows() ? split[i].split('\\').join('/').replace(/^([^:\\/]*):/, (_, $1) => `${isCygwin() ? '/proc/cygdrive' : '/mnt'}/${$1.toLowerCase()}`) : split[i]
+    const posix = isWindows ? split[i].split('\\').join('/').replace(/^([^:\\/]*):/, (_, $1) => `${isCygwin() ? '/proc/cygdrive' : '/mnt'}/${$1.toLowerCase()}`) : split[i]
 
     result.win32 = result.win32 ? `${result.win32};${win32}` : win32
     result.posix = result.posix ? `${result.posix}:${posix}` : posix
@@ -692,15 +689,4 @@ function normalizePathEnvVar (nodePath: undefined | string | string[]): Normaliz
 
 function shimTarget (src: string): string {
   return `cmd-shim-target=${src.split('\\').join('/')}`
-}
-
-/**
- * Check whether a shim's content points at the given source path.
- *
- * @param shimContent The text content of the shim file.
- * @param src The expected source path (the executable the shim should point to).
- * @return `true` if the shim contains a matching target marker.
- */
-function isShimPointingAt (shimContent: string, src: string): boolean {
-  return shimContent.includes(`# ${shimTarget(src)}\n`)
 }

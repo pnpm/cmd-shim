@@ -9,9 +9,9 @@
     "allowJs": true,
     "checkJs": true,
     "strict": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "types": ["node","jest"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node", "jest"],
     "noEmit": true
   },
   "references": [

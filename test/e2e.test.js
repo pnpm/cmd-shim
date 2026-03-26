@@ -1,7 +1,7 @@
-const fs = require('fs')
-const path = require('path')
-const tempy = require('tempy')
-const cmdShim = require('../')
+import fs from 'node:fs'
+import path from 'node:path'
+import tempy from 'tempy'
+import { cmdShim } from '../index.js'
 
 const testOnWindows = process.platform === 'win32' ? test : test.skip
 

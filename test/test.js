@@ -1,10 +1,7 @@
-
-'use strict'
-const path = require('path')
-const cmdExtension = require('cmd-extension')
-const { fixtures, fixtures2, fs } = require('./setup')
-
-const cmdShim = require('../')
+import path from 'node:path'
+import cmdExtension from 'cmd-extension'
+import { fixtures, fixtures2, fs } from './setup.js'
+import { cmdShim, isShimPointingAt } from '../index.js'
 
 /**
  * @param {string} fileName
@@ -36,18 +33,18 @@ describe('isShimPointingAt', () => {
 
   test('returns true for the correct target', async () => {
     const content = await fs.promises.readFile(to, 'utf8')
-    expect(cmdShim.isShimPointingAt(content, src)).toBe(true)
+    expect(isShimPointingAt(content, src)).toBe(true)
   })
 
   test('returns false for a different target', async () => {
     const content = await fs.promises.readFile(to, 'utf8')
-    expect(cmdShim.isShimPointingAt(content, '/wrong/path.exe')).toBe(false)
+    expect(isShimPointingAt(content, '/wrong/path.exe')).toBe(false)
   })
 
   test('returns false for a subdirectory prefix of the target', async () => {
     const content = await fs.promises.readFile(to, 'utf8')
     // src without the last path segment — must not match
-    expect(cmdShim.isShimPointingAt(content, path.dirname(src))).toBe(false)
+    expect(isShimPointingAt(content, path.dirname(src))).toBe(false)
   })
 })
 

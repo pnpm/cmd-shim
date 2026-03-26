@@ -1,8 +1,5 @@
-'use strict'
-/** @type {typeof import("fs")} */
-// @ts-ignore
-const memfs = require('memfs')
-const path = require('path')
+import { fs as memfs } from 'memfs'
+import path from 'node:path'
 
 const { fixtures, fixtures2 } = process.platform === 'win32' ? {
   fixtures: 'I:\\cmd-shim\\fixtures',
@@ -12,9 +9,7 @@ const { fixtures, fixtures2 } = process.platform === 'win32' ? {
   fixtures2: '/bar/cmd-shim/fixtures'
 }
 
-exports.fixtures = fixtures
-exports.fixtures2 = fixtures2
-exports.fs = memfs
+export { fixtures, fixtures2, memfs as fs }
 
 /** @type {{ [dir: string]: { [filename: string]: string } }} */
 const fixtureFiles = {
