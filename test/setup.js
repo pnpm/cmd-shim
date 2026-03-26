@@ -27,16 +27,16 @@ const fixtureFiles = {
   }
 }
 
-beforeAll(() => {
-  const fs = memfs.promises
-  return Promise.all(
+export async function setupFixtures () {
+  const fsPromises = memfs.promises
+  await Promise.all(
     Object.entries(fixtureFiles).map(async ([dir, files]) => {
-      await fs.mkdir(dir, { recursive: true })
+      await fsPromises.mkdir(dir, { recursive: true })
       return Promise.all(
         Object.entries(files).map(([filename, contents]) => {
-          return fs.writeFile(path.join(dir, filename), contents)
+          return fsPromises.writeFile(path.join(dir, filename), contents)
         })
       )
     })
   )
-})
+}
