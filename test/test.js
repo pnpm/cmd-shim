@@ -20,9 +20,36 @@ function testFile (fileName, lineEnding = '\n') {
     if (cmdExtension !== '.cmd') {
       content = content.replaceAll(cmdExtension, '.cmd')
     }
+    // Strip the target marker line — it contains a platform-dependent absolute path.
+    // The marker is tested directly by the isShimPointingAt tests.
+    content = content.replace(/# cmd-shim-target=.*\n/, '')
     expect(content).toMatchSnapshot()
   })
 }
+
+describe('isShimPointingAt', () => {
+  const src = path.resolve(fixtures, 'src.exe')
+  const to = path.resolve(fixtures, 'exe.shim')
+  beforeAll(() => {
+    return cmdShim(src, to, { createCmdFile: false, fs })
+  })
+
+  test('returns true for the correct target', async () => {
+    const content = await fs.promises.readFile(to, 'utf8')
+    expect(cmdShim.isShimPointingAt(content, src)).toBe(true)
+  })
+
+  test('returns false for a different target', async () => {
+    const content = await fs.promises.readFile(to, 'utf8')
+    expect(cmdShim.isShimPointingAt(content, '/wrong/path.exe')).toBe(false)
+  })
+
+  test('returns false for a subdirectory prefix of the target', async () => {
+    const content = await fs.promises.readFile(to, 'utf8')
+    // src without the last path segment — must not match
+    expect(cmdShim.isShimPointingAt(content, path.dirname(src))).toBe(false)
+  })
+})
 
 describe('no cmd file', () => {
   const src = path.resolve(fixtures, 'src.exe')

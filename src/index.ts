@@ -72,6 +72,7 @@ type Options = cmdShim.Options
 
 export = cmdShim
 cmdShim.ifExists = cmdShimIfExists
+cmdShim.isShimPointingAt = isShimPointingAt
 
 /**
  * @internal
@@ -499,6 +500,10 @@ exit $?
 `
   }
 
+  // Marker used by consumers to detect whether the shim is up-to-date
+  // without parsing the script content.
+  sh += `# ${shimTarget(src)}\n`
+
   return sh
 }
 
@@ -683,4 +688,19 @@ function normalizePathEnvVar (nodePath: undefined | string | string[]): Normaliz
     result[i] = {win32, posix}
   }
   return result
+}
+
+function shimTarget (src: string): string {
+  return `cmd-shim-target=${src.split('\\').join('/')}`
+}
+
+/**
+ * Check whether a shim's content points at the given source path.
+ *
+ * @param shimContent The text content of the shim file.
+ * @param src The expected source path (the executable the shim should point to).
+ * @return `true` if the shim contains a matching target marker.
+ */
+function isShimPointingAt (shimContent: string, src: string): boolean {
+  return shimContent.includes(`# ${shimTarget(src)}\n`)
 }
