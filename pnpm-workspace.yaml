@@ -1,3 +1,5 @@
+allowBuilds:
+  core-js: false
 configDependencies:
   '@pnpm/better-defaults': 0.2.0
 ignoredBuiltDependencies:

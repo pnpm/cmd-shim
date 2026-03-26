@@ -20,6 +20,9 @@ function testFile (fileName, lineEnding = '\n') {
     if (cmdExtension !== '.cmd') {
       content = content.replaceAll(cmdExtension, '.cmd')
     }
+    // Strip the target marker line — it contains a platform-dependent absolute path.
+    // The marker is tested directly by the isShimPointingAt tests.
+    content = content.replace(/# cmd-shim-target=.*\n/, '')
     expect(content).toMatchSnapshot()
   })
 }

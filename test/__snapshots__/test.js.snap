@@ -17,7 +17,6 @@ if [ -x "$basedir/cmd" ]; then
 else
   exec cmd /C "$basedir/src.bat" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.bat
 "
 `;
 
@@ -78,7 +77,6 @@ esac
 
 "/.pnpm/nodejs/16.0.0/node"  "$basedir/src.env" "$@"
 exit $?
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.env
 "
 `;
 
@@ -125,7 +123,6 @@ if [ -x "$basedir/node" ]; then
 else
   exec node  "$basedir/src.env" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.env
 "
 `;
 
@@ -194,7 +191,6 @@ if [ -x "$basedir/node" ]; then
 else
   exec node  "$basedir/src.env" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.env
 "
 `;
 
@@ -277,7 +273,6 @@ if [ -x "$basedir/node" ]; then
 else
   exec node  "$basedir/src.env" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.env
 "
 `;
 
@@ -352,7 +347,6 @@ if [ -x "$basedir/node" ]; then
 else
   exec node  --expose_gc "$basedir/src.env.args" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.env.args
 "
 `;
 
@@ -416,7 +410,6 @@ if [ -x "$basedir/node" ]; then
 else
   exec node --preserve-symlinks "$basedir/src.env" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.env
 "
 `;
 
@@ -480,7 +473,6 @@ if [ -x "$basedir/node" ]; then
 else
   exec node  "$basedir/src.env" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.env
 "
 `;
 
@@ -544,7 +536,6 @@ if [ -x "$basedir//usr/bin/sh" ]; then
 else
   exec /usr/bin/sh  "$basedir/src.sh" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.sh
 "
 `;
 
@@ -608,7 +599,6 @@ if [ -x "$basedir//usr/bin/sh" ]; then
 else
   exec /usr/bin/sh  -x "$basedir/src.sh.args" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.sh.args
 "
 `;
 
@@ -735,7 +725,6 @@ if [ -x "$basedir//usr/bin/sh" ]; then
 else
   exec /usr/bin/sh  -x "$basedir/src.sh.args" hello "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.sh.args
 "
 `;
 
@@ -796,7 +785,6 @@ esac
 
 "$basedir/src.exe"   "$@"
 exit $?
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.exe
 "
 `;
 
@@ -834,7 +822,6 @@ esac
 
 "$basedir/src.exe"   "$@"
 exit $?
-# cmd-shim-target=/foo/cmd-shim/fixtures/src.exe
 "
 `;
 
@@ -881,7 +868,6 @@ if [ -x "$basedir/node" ]; then
 else
   exec node  --expose_gc "$basedir/from.env.S" "$@"
 fi
-# cmd-shim-target=/foo/cmd-shim/fixtures/from.env.S
 "
 `;
 
