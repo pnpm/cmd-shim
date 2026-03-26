@@ -4,7 +4,10 @@ lockfileVersion: '9.0'
 importers:
 
   .:
-    configDependencies: {}
+    configDependencies:
+      '@pnpm/better-defaults':
+        specifier: 0.2.0
+        version: 0.2.0
     packageManagerDependencies:
       '@pnpm/exe':
         specifier: 10.30.1
@@ -14,6 +17,9 @@ importers:
         version: 10.30.1
 
 packages:
+
+  '@pnpm/better-defaults@0.2.0':
+    resolution: {integrity: sha512-90iZf6xgZTlNuUVn5djvCXM720TgZrYmmb8jmjIv5c5efx3I46rmCcT2j5nlZJ6VrvghNgUaI2y/rnHe2W4L6g==}
 
   '@pnpm/exe@10.30.1':
     resolution: {integrity: sha512-1uJQQXTOjCCcWRFZEZCbILT72kHcBcom9/QT4uuz0tIjbepv6DinsX4Vn3KThvnxP/bylJ0Bhx0G004TME8EYA==}
@@ -61,6 +67,8 @@ packages:
     hasBin: true
 
 snapshots:
+
+  '@pnpm/better-defaults@0.2.0': {}
 
   '@pnpm/exe@10.30.1':
     optionalDependencies:
