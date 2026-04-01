@@ -77,7 +77,7 @@ case \`uname\` in
     ;;
 esac
 
-"/.pnpm/nodejs/16.0.0/node"  "$basedir/src.env" "$@"
+exec "/.pnpm/nodejs/16.0.0/node"  "$basedir/src.env" "$@"
 exit $?
 
 `;
@@ -818,7 +818,7 @@ case \`uname\` in
     ;;
 esac
 
-"$basedir/src.exe"   "$@"
+exec "$basedir/src.exe"   "$@"
 exit $?
 
 `;
@@ -857,7 +857,7 @@ case \`uname\` in
     ;;
 esac
 
-"$basedir/src.exe"   "$@"
+exec "$basedir/src.exe"   "$@"
 exit $?
 
 `;

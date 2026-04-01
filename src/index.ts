@@ -492,7 +492,7 @@ fi
 `
   } else {
     sh += `\
-${shProg} ${args} ${shTarget} ${progArgs}"$@"
+exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
 exit $?
 `
   }
