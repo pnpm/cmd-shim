@@ -10,6 +10,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import gfs from '@pnpm/fs.graceful-fs'
 import CMD_EXTENSION from 'cmd-extension'
 
 export interface Options {
@@ -104,7 +105,6 @@ const DEFAULT_OPTIONS = {
   // Create PowerShell file by default if the option hasn't been specified
   createPwshFile: true,
   createCmdFile: isWindows,
-  fs,
 }
 /**
  * Map from extensions of files that this module is frequently used for to their runtime.
@@ -122,8 +122,12 @@ const extensionToProgramMap = new Map([
 
 function ingestOptions (opts?: Options): InternalOptions {
   const opts_ = {...DEFAULT_OPTIONS, ...opts} as InternalOptions
-  const fsImpl = opts_.fs
-  opts_.fs_ = fsImpl.promises
+  // Use @pnpm/fs.graceful-fs by default to queue retries on EMFILE/ENFILE.
+  // Native fs.promises bypasses the userland patches that graceful-fs installs
+  // on the callback API, so under high concurrency (many bins linked at once)
+  // it surfaces EMFILE instead of waiting for a free file descriptor.
+  // Tests and other callers may still inject a custom fs (e.g. memfs).
+  opts_.fs_ = opts_.fs ? opts_.fs.promises : (gfs as unknown as FsPromises)
   return opts_
 }
 
