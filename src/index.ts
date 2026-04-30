@@ -10,8 +10,22 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import gfs from '@pnpm/fs.graceful-fs'
+import { promisify } from 'node:util'
+import gfs from 'graceful-fs'
 import CMD_EXTENSION from 'cmd-extension'
+
+// graceful-fs patches the callback API with EMFILE retry/queueing.
+// fs.promises bypasses those patches, so we promisify the patched
+// callback functions instead. This is the same pattern @pnpm/fs.graceful-fs
+// uses, inlined here to avoid a workspace dependency.
+const gfsPromises = {
+  chmod: promisify(gfs.chmod),
+  mkdir: promisify(gfs.mkdir),
+  readFile: promisify(gfs.readFile),
+  stat: promisify(gfs.stat),
+  unlink: promisify(gfs.unlink),
+  writeFile: promisify(gfs.writeFile),
+}
 
 export interface Options {
   /**
@@ -122,12 +136,8 @@ const extensionToProgramMap = new Map([
 
 function ingestOptions (opts?: Options): InternalOptions {
   const opts_ = {...DEFAULT_OPTIONS, ...opts} as InternalOptions
-  // Use @pnpm/fs.graceful-fs by default to queue retries on EMFILE/ENFILE.
-  // Native fs.promises bypasses the userland patches that graceful-fs installs
-  // on the callback API, so under high concurrency (many bins linked at once)
-  // it surfaces EMFILE instead of waiting for a free file descriptor.
   // Tests and other callers may still inject a custom fs (e.g. memfs).
-  opts_.fs_ = opts_.fs ? opts_.fs.promises : (gfs as unknown as FsPromises)
+  opts_.fs_ = opts_.fs ? opts_.fs.promises : (gfsPromises as unknown as FsPromises)
   return opts_
 }
 
