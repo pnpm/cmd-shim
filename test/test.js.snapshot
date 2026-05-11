@@ -12,9 +12,9 @@ case \`uname\` in
 esac
 
 if [ -x "$basedir/cmd" ]; then
-  exec "$basedir/cmd" /C "$basedir/src.bat" "$@"
+  exec "$basedir/cmd" //C "$basedir/src.bat" "$@"
 else
-  exec cmd /C "$basedir/src.bat" "$@"
+  exec cmd //C "$basedir/src.bat" "$@"
 fi
 
 `;
