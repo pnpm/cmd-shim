@@ -442,13 +442,17 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   let shLongProg
   shTarget = shTarget.split('\\').join('/')
   const quotedPathToTarget = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir/${shTarget}"`
-  // Escape leading `/` on single-letter switches like `/C` (passed to cmd.exe
-  // for `.cmd`/`.bat` targets). When Git Bash / MSYS launches a native Win32
-  // process, arguments that look like POSIX paths are translated — a bare
-  // `/C` becomes `C:\`, which drops the switch and leaves cmd.exe running
-  // interactively. Prefixing with `//` is the MSYS escape: it survives the
-  // translation and reaches cmd.exe as `/C`.
-  let args = escapeMsysCmdSwitches(opts.args || '')
+  // For `.cmd`/`.bat` targets the runtime is `cmd` and args is `/C`. When
+  // Git Bash / MSYS launches a native Win32 process, arguments that look
+  // like POSIX paths are translated — a bare `/C` becomes `C:\`, which
+  // drops the switch and leaves cmd.exe running interactively. Prefixing
+  // with `//` is the MSYS escape: it survives the translation and reaches
+  // cmd.exe as `/C`. Scoped to the cmd runtime so shebang-derived `/C`
+  // args on other shims are passed through unchanged.
+  let args = opts.args || ''
+  if (opts.prog === 'cmd' || opts.prog === 'cmd.exe') {
+    args = escapeMsysCmdSwitches(args)
+  }
   const shNodePath = normalizePathEnvVar(opts.nodePath).posix
   if (!shProg) {
     shProg = quotedPathToTarget
