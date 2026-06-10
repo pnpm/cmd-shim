@@ -442,6 +442,8 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   let shLongProg
   shTarget = shTarget.split('\\').join('/')
   const quotedPathToTarget = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir/${shTarget}"`
+  const quotedPathToTarget_win = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir_win/${shTarget}"`
+  let shTarget_win
   // For `.cmd`/`.bat` targets the runtime is `cmd` and args is `/C`. When
   // Git Bash / MSYS launches a native Win32 process, arguments that look
   // like POSIX paths are translated — a bare `/C` becomes `C:\`, which
@@ -460,43 +462,68 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
     shTarget = ''
   } else if (opts.prog === 'node' && opts.nodeExecPath) {
     shProg = `"${opts.nodeExecPath}"`
-    shTarget = quotedPathToTarget
+    shTarget = /\.exe$/.test(opts.nodeExecPath) ? quotedPathToTarget_win : quotedPathToTarget
   } else {
     shLongProg = `"$basedir/${opts.prog}"`
     shTarget = quotedPathToTarget
+    shTarget_win = quotedPathToTarget_win
   }
 
   let progArgs = opts.progArgs ? `${opts.progArgs.join(` `)} ` : ''
 
   // #!/bin/sh
-  // basedir=`dirname "$0"`
+  // basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
+  // basedir_win="$basedir"
   //
-  // case `uname` in
-  //     *CYGWIN*|*MINGW*|*MSYS*)
-  //         if command -v cygpath > /dev/null 2>&1; then
-  //             basedir=`cygpath -w "$basedir"`
-  //         fi
-  //      ;;
+  // case `uname -a` in
+  //   *CYGWIN*|*MINGW*|*MSYS*)
+  //     if command -v cygpath > /dev/null 2>&1; then
+  //       basedir=`cygpath -w "$basedir"`
+  //       basedir_win="$basedir"
+  //     fi
+  //   ;;
+  //   *WSL2*)
+  //     if command -v wslpath > /dev/null 2>&1; then
+  //       basedir_win="$(wslpath -w "$basedir" 2> /dev/null)"
+  //       if [ $? -ne 0 ] || [ -z "$basedir_win" ]; then
+  //         basedir_win="$basedir"
+  //       fi
+  //     fi
+  //   ;;
   // esac
   //
   // export NODE_PATH="<nodepath>"
   //
   // if [ -x "$basedir/node.exe" ]; then
-  //   exec "$basedir/node.exe" "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
+  //   exec "$basedir/node.exe"  "$basedir_win/node_modules/npm/bin/npm-cli.js" "$@"
+  // elif [ -x "$basedir/node" ]; then
+  //   exec "$basedir/node"  "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
+  // elif [ -x node ]; then
+  //   exec node  "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
   // else
-  //   exec node "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
+  //   exec node.exe  "$basedir_win/node_modules/npm/bin/npm-cli.js" "$@"
   // fi
 
   let sh = `\
 #!/bin/sh
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+basedir_win="$basedir"
 
-case \`uname\` in
-    *CYGWIN*|*MINGW*|*MSYS*)
-        if command -v cygpath > /dev/null 2>&1; then
-            basedir=\`cygpath -w "$basedir"\`
-        fi
-    ;;
+case \`uname -a\` in
+  *CYGWIN*|*MINGW*|*MSYS*)
+    if command -v cygpath > /dev/null 2>&1; then
+      basedir=\`cygpath -w "$basedir"\`
+      basedir_win="$basedir"
+    fi
+  ;;
+  *WSL2*)
+    if command -v wslpath > /dev/null 2>&1; then
+      basedir_win="$(wslpath -w "$basedir" 2> /dev/null)"
+      if [ $? -ne 0 ] || [ -z "$basedir_win" ]; then
+        basedir_win="$basedir"
+      fi
+    fi
+  ;;
 esac
 
 `
@@ -517,10 +544,14 @@ fi
 
   if (shLongProg) {
     sh += `\
-if [ -x ${shLongProg} ]; then
+if [ -x ${shLongProg.replace(/"$/, '.exe"')} ]; then
+  exec ${shLongProg.replace(/"$/, '.exe"')} ${args} ${shTarget_win} ${progArgs}"$@"
+elif [ -x ${shLongProg} ]; then
   exec ${shLongProg} ${args} ${shTarget} ${progArgs}"$@"
-else
+elif [ -x ${shProg} ]; then
   exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
+else
+  exec ${shProg}.exe ${args} ${shTarget_win} ${progArgs}"$@"
 fi
 `
   } else {
