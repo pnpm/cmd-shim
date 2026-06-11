@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { describe, test, snapshot } from 'node:test'
 import assert from 'node:assert/strict'
+import cmdExtension from 'cmd-extension'
 
 snapshot.setDefaultSnapshotSerializers([
   (value) => typeof value === 'string' ? `\n${value.replaceAll('\r', '')}` : JSON.stringify(value),
@@ -106,5 +107,34 @@ describeOnPosix('sh shim uses POSIX runtime from PATH', () => {
     assert.equal(r.status, 0, `shim exited ${r.status}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`)
     assert.equal(r.stdout.trim(), 'SHIM_OK')
     assert.doesNotMatch(r.stderr, /node\.exe/)
+  })
+})
+
+describe('create a shim of a pwsh shim with the same name in another location', () => {
+  // https://github.com/pnpm/cmd-shim/issues/10#issuecomment-4681988320
+  // If the option `stripShellExtensionFromShim` is true, it should strip common shell 
+  // extensions (e.g., `.ps1`) from the end of the `to` argument name.
+  // Otherwise, it should leave `to` name as it is.
+  test('generate shims with opts.stripShellExtensionFromShim true/false', async (t) => {
+    const tempDir = tempy.directory()
+    const srcDir = path.join(tempDir, 'src')
+    const toDir_strip = path.join(tempDir, 'to', 'strip')
+    const toDir_noSrip = path.join(tempDir, 'to', 'noStrip')
+    fs.mkdirSync(srcDir, { recursive: true })
+    fs.mkdirSync(toDir_strip, { recursive: true })
+    fs.mkdirSync(toDir_noSrip, { recursive: true })
+
+    const src = path.join(srcDir, 'script.ps1')
+    fs.writeFileSync(src, 'Write-Output "Hello from ps1 script!"\r\n', 'utf8')
+
+    const to_strip = path.join(toDir_strip, 'script.ps1')
+    await cmdShim(src, to_strip, { createCmdFile: true, stripShellExtensionFromShim: true })
+    const files_strip = fs.readdirSync(toDir_strip).sort()
+    assert.deepStrictEqual(files_strip, ['script', `script${cmdExtension}`, 'script.ps1'])
+    
+    const to_noStrip = path.join(toDir_noSrip, 'script.ps1')
+    await cmdShim(src, to_noStrip, { createCmdFile: true, stripShellExtensionFromShim: false })
+    const files_noStrip = fs.readdirSync(toDir_noSrip).sort()
+    assert.deepStrictEqual(files_noStrip, ['script.ps1', `script.ps1${cmdExtension}`, 'script.ps1.ps1'])
   })
 })

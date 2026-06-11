@@ -83,6 +83,13 @@ export interface Options {
   nodeExecPath?: string
 
   prependToPath?: string
+
+  /**
+   * If common shell extensions should be stripped from target name.
+   *
+   * @default true
+   */
+  stripShellExtensionFromShim?: boolean
 }
 
 /**
@@ -119,6 +126,7 @@ const DEFAULT_OPTIONS = {
   // Create PowerShell file by default if the option hasn't been specified
   createPwshFile: true,
   createCmdFile: isWindows,
+  stripShellExtensionFromShim: true
 }
 /**
  * Map from extensions of files that this module is frequently used for to their runtime.
@@ -152,7 +160,13 @@ function ingestOptions (opts?: Options): InternalOptions {
  */
 export async function cmdShim (src: string, to: string, opts?: Options): Promise<void> {
   const opts_ = ingestOptions(opts)
-  await cmdShim_(src, to, opts_)
+  // strip shell extensions that might cause confusion
+  // e.g., the sh shim of the powershell script.ps1 will be named script.ps1
+  // but it will be an sh script with a ps1 extension causing confusion for powershell
+  const target = opts_.stripShellExtensionFromShim
+    ? to.replace(/\.(cmd|bat|ps1|sh)$/i, "")
+    : to
+  await cmdShim_(src, target, opts_)
 }
 
 /**

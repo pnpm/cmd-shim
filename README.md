@@ -39,7 +39,8 @@ The same as above, but will just continue if the file does not exist.
 - `opts.nodeExecPath` - _String_ - sets the path to the Node.js executable.
 - `opts.createCmdFile` - _Boolean_ - is `true` on Windows by default. If true, creates a cmd file.
 - `opts.createPwshFile` - _Boolean_ - is `true` by default. If true, creates a powershell file.
-- `opts.progArgs` - String - optional arguments that will be prepend to any CLI arguments
+- `opts.progArgs` - _String_ - optional arguments that will be prepended to any CLI arguments.
+- `opts.stripShellExtensionFromShim` - _Boolean_ - is `true` by default. If true, strips common shell extensions from the name of the `to` argument before creating the shims.
 
 ```javascript
 const cmdShim = require('@zkochan/cmd-shim')
