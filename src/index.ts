@@ -439,7 +439,10 @@ function generateCmdShim (src: string, to: string, opts: InternalOptions): strin
 function generateShShim (src: string, to: string, opts: InternalOptions): string {
   let shTarget = path.relative(path.dirname(to), src)
   let shProg = opts.prog && opts.prog.split('\\').join('/')
-  let shLongProg
+  let shLongProg: string | undefined
+  let shLongProgExe = ''
+  let shProgExe = ''
+  let shProgHasExe = false
   shTarget = shTarget.split('\\').join('/')
   const quotedPathToTarget = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir/${shTarget}"`
   const quotedPathToTarget_win = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir_win/${shTarget}"`
@@ -464,7 +467,10 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
     shProg = `"${opts.nodeExecPath}"`
     shTarget = /\.exe$/.test(opts.nodeExecPath) ? quotedPathToTarget_win : quotedPathToTarget
   } else {
-    shLongProg = `"$basedir/${opts.prog}"`
+    shProgHasExe = /\.exe$/i.test(shProg)
+    shProgExe = shProgHasExe ? shProg : `${shProg}.exe`
+    shLongProg = `"$basedir/${shProg}"`
+    shLongProgExe = `"$basedir/${shProgExe}"`
     shTarget = quotedPathToTarget
     shTarget_win = quotedPathToTarget_win
   }
@@ -474,6 +480,7 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   // #!/bin/sh
   // basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
   // basedir_win="$basedir"
+  // exe=""
   //
   // case `uname -a` in
   //   *CYGWIN*|*MINGW*|*MSYS*)
@@ -481,12 +488,15 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   //       basedir=`cygpath -w "$basedir"`
   //       basedir_win="$basedir"
   //     fi
+  //     exe=".exe"
   //   ;;
   //   *WSL2*)
   //     if command -v wslpath > /dev/null 2>&1; then
   //       basedir_win="$(wslpath -w "$basedir" 2> /dev/null)"
   //       if [ $? -ne 0 ] || [ -z "$basedir_win" ]; then
   //         basedir_win="$basedir"
+  //       else
+  //         exe=".exe"
   //       fi
   //     fi
   //   ;;
@@ -498,16 +508,19 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   //   exec "$basedir/node.exe"  "$basedir_win/node_modules/npm/bin/npm-cli.js" "$@"
   // elif [ -x "$basedir/node" ]; then
   //   exec "$basedir/node"  "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
-  // elif [ -x node ]; then
+  // elif command -v node >/dev/null 2>&1; then
   //   exec node  "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
-  // else
+  // elif [ -n "$exe" ] && command -v node.exe >/dev/null 2>&1; then
   //   exec node.exe  "$basedir_win/node_modules/npm/bin/npm-cli.js" "$@"
+  // else
+  //   exec node  "$basedir/node_modules/npm/bin/npm-cli.js" "$@"
   // fi
 
   let sh = `\
 #!/bin/sh
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
+exe=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
@@ -515,12 +528,15 @@ case \`uname -a\` in
       basedir=\`cygpath -w "$basedir"\`
       basedir_win="$basedir"
     fi
+    exe=".exe"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
       basedir_win="$(wslpath -w "$basedir" 2> /dev/null)"
       if [ $? -ne 0 ] || [ -z "$basedir_win" ]; then
         basedir_win="$basedir"
+      else
+        exe=".exe"
       fi
     fi
   ;;
@@ -543,17 +559,29 @@ fi
   }
 
   if (shLongProg) {
-    sh += `\
-if [ -x ${shLongProg.replace(/"$/, '.exe"')} ]; then
-  exec ${shLongProg.replace(/"$/, '.exe"')} ${args} ${shTarget_win} ${progArgs}"$@"
-elif [ -x ${shLongProg} ]; then
-  exec ${shLongProg} ${args} ${shTarget} ${progArgs}"$@"
-elif [ -x ${shProg} ]; then
-  exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
+    if (shProgHasExe) {
+      sh += `\
+if [ -x ${shLongProgExe} ]; then
+  exec ${shLongProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
 else
-  exec ${shProg}.exe ${args} ${shTarget_win} ${progArgs}"$@"
+  exec ${shProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
 fi
 `
+    } else {
+      sh += `\
+if [ -n "$exe" ] && [ -x ${shLongProgExe} ]; then
+  exec ${shLongProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
+elif [ -x ${shLongProg} ]; then
+  exec ${shLongProg} ${args} ${shTarget} ${progArgs}"$@"
+elif command -v ${shProg} >/dev/null 2>&1; then
+  exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
+elif [ -n "$exe" ] && command -v ${shProgExe} >/dev/null 2>&1; then
+  exec ${shProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
+else
+  exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
+fi
+`
+    }
   } else {
     sh += `\
 exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"

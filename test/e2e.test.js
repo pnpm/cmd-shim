@@ -89,3 +89,22 @@ describeOnPosix('sh shim binstub uses exec', () => {
     )
   })
 })
+
+describeOnPosix('sh shim uses POSIX runtime from PATH', () => {
+  test('does not fall through to node.exe when node is only on PATH', async () => {
+    const tempDir = tempy.directory()
+    const target = path.join(tempDir, 'tool.js')
+    fs.writeFileSync(target, '#!/usr/bin/env node\nconsole.log("SHIM_OK")\n', 'utf8')
+    const shim = path.join(tempDir, 'tool')
+    await cmdShim(target, shim, { createCmdFile: false })
+
+    const r = spawnSync('/bin/sh', [shim], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+
+    assert.equal(r.status, 0, `shim exited ${r.status}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`)
+    assert.equal(r.stdout.trim(), 'SHIM_OK')
+    assert.doesNotMatch(r.stderr, /node\.exe/)
+  })
+})
