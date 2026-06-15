@@ -446,18 +446,9 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   shTarget = shTarget.split('\\').join('/')
   const quotedPathToTarget = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir/${shTarget}"`
   const quotedPathToTarget_win = path.isAbsolute(shTarget) ? `"${shTarget}"` : `"$basedir_win/${shTarget}"`
-  let shTarget_win
-  // For `.cmd`/`.bat` targets the runtime is `cmd` and args is `/C`. When
-  // Git Bash / MSYS launches a native Win32 process, arguments that look
-  // like POSIX paths are translated — a bare `/C` becomes `C:\`, which
-  // drops the switch and leaves cmd.exe running interactively. Prefixing
-  // with `//` is the MSYS escape: it survives the translation and reaches
-  // cmd.exe as `/C`. Scoped to the cmd runtime so shebang-derived `/C`
-  // args on other shims are passed through unchanged.
+  let shTarget_win = ''
   let args = opts.args || ''
-  if (opts.prog === 'cmd' || opts.prog === 'cmd.exe') {
-    args = escapeMsysCmdSwitches(args)
-  }
+  const isCmdRuntime = opts.prog === 'cmd' || opts.prog === 'cmd.exe'
   const shNodePath = normalizePathEnvVar(opts.nodePath).posix
   if (!shProg) {
     shProg = quotedPathToTarget
@@ -481,14 +472,15 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   // basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
   // basedir_win="$basedir"
   // exe=""
+  // msys=""
   //
   // case `uname -a` in
   //   *CYGWIN*|*MINGW*|*MSYS*)
   //     if command -v cygpath > /dev/null 2>&1; then
-  //       basedir=`cygpath -w "$basedir"`
-  //       basedir_win="$basedir"
+  //       basedir_win=`cygpath -w "$basedir"`
   //     fi
   //     exe=".exe"
+  //     msys="true"
   //   ;;
   //   *WSL2*)
   //     if command -v wslpath > /dev/null 2>&1; then
@@ -521,14 +513,15 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -558,35 +551,50 @@ fi
 `
   }
 
-  if (shLongProg) {
-    if (shProgHasExe) {
-      sh += `\
+  const generateExecBlock = (execArgs: string) => {
+    if (shLongProg) {
+      if (shProgHasExe) {
+        return `\
 if [ -x ${shLongProgExe} ]; then
-  exec ${shLongProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
+  exec ${shLongProgExe} ${execArgs} ${shTarget_win} ${progArgs}"$@"
 else
-  exec ${shProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
+  exec ${shProgExe} ${execArgs} ${shTarget_win} ${progArgs}"$@"
 fi
 `
-    } else {
-      sh += `\
+      } else {
+        return `\
 if [ -n "$exe" ] && [ -x ${shLongProgExe} ]; then
-  exec ${shLongProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
+  exec ${shLongProgExe} ${execArgs} ${shTarget_win} ${progArgs}"$@"
 elif [ -x ${shLongProg} ]; then
-  exec ${shLongProg} ${args} ${shTarget} ${progArgs}"$@"
+  exec ${shLongProg} ${execArgs} ${shTarget} ${progArgs}"$@"
 elif command -v ${shProg} >/dev/null 2>&1; then
-  exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
+  exec ${shProg} ${execArgs} ${shTarget} ${progArgs}"$@"
 elif [ -n "$exe" ] && command -v ${shProgExe} >/dev/null 2>&1; then
-  exec ${shProgExe} ${args} ${shTarget_win} ${progArgs}"$@"
+  exec ${shProgExe} ${execArgs} ${shTarget_win} ${progArgs}"$@"
 else
-  exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
+  exec ${shProg} ${execArgs} ${shTarget} ${progArgs}"$@"
 fi
 `
-    }
-  } else {
-    sh += `\
-exec ${shProg} ${args} ${shTarget} ${progArgs}"$@"
+      }
+    } else {
+      return `\
+exec ${shProg} ${execArgs} ${shTarget} ${progArgs}"$@"
 exit $?
 `
+    }
+  }
+
+  const msysArgs = isCmdRuntime ? escapeMsysCmdSwitches(args) : args
+  if (msysArgs !== args) {
+    sh += `\
+if [ -n "$msys" ]; then
+${indentShellBlock(generateExecBlock(msysArgs))}
+else
+${indentShellBlock(generateExecBlock(args))}
+fi
+`
+  } else {
+    sh += generateExecBlock(args)
   }
 
   // Marker used by consumers to detect whether the shim is up-to-date
@@ -594,6 +602,10 @@ exit $?
   sh += `# ${shimTarget(src)}\n`
 
   return sh
+}
+
+function indentShellBlock (script: string): string {
+  return script.split('\n').map(line => line ? `  ${line}` : line).join('\n')
 }
 
 /**
