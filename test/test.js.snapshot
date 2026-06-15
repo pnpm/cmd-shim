@@ -4,14 +4,15 @@ exports[`batch script > shim files > bat.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -25,16 +26,32 @@ case \`uname -a\` in
   ;;
 esac
 
-if [ -n "$exe" ] && [ -x "$basedir/cmd.exe" ]; then
-  exec "$basedir/cmd.exe" //C "$basedir_win/src.bat" "$@"
-elif [ -x "$basedir/cmd" ]; then
-  exec "$basedir/cmd" //C "$basedir/src.bat" "$@"
-elif command -v cmd >/dev/null 2>&1; then
-  exec cmd //C "$basedir/src.bat" "$@"
-elif [ -n "$exe" ] && command -v cmd.exe >/dev/null 2>&1; then
-  exec cmd.exe //C "$basedir_win/src.bat" "$@"
+if [ -n "$msys" ]; then
+  if [ -n "$exe" ] && [ -x "$basedir/cmd.exe" ]; then
+    exec "$basedir/cmd.exe" //C "$basedir_win/src.bat" "$@"
+  elif [ -x "$basedir/cmd" ]; then
+    exec "$basedir/cmd" //C "$basedir/src.bat" "$@"
+  elif command -v cmd >/dev/null 2>&1; then
+    exec cmd //C "$basedir/src.bat" "$@"
+  elif [ -n "$exe" ] && command -v cmd.exe >/dev/null 2>&1; then
+    exec cmd.exe //C "$basedir_win/src.bat" "$@"
+  else
+    exec cmd //C "$basedir/src.bat" "$@"
+  fi
+
 else
-  exec cmd //C "$basedir/src.bat" "$@"
+  if [ -n "$exe" ] && [ -x "$basedir/cmd.exe" ]; then
+    exec "$basedir/cmd.exe" /C "$basedir_win/src.bat" "$@"
+  elif [ -x "$basedir/cmd" ]; then
+    exec "$basedir/cmd" /C "$basedir/src.bat" "$@"
+  elif command -v cmd >/dev/null 2>&1; then
+    exec cmd /C "$basedir/src.bat" "$@"
+  elif [ -n "$exe" ] && command -v cmd.exe >/dev/null 2>&1; then
+    exec cmd.exe /C "$basedir_win/src.bat" "$@"
+  else
+    exec cmd /C "$basedir/src.bat" "$@"
+  fi
+
 fi
 
 `;
@@ -90,14 +107,15 @@ exports[`custom node executable > shim files > env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -150,14 +168,15 @@ exports[`env shebang > shim files > env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -236,14 +255,15 @@ exports[`env shebang with NODE_PATH > shim files > env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -345,14 +365,15 @@ exports[`env shebang with PATH extending > shim files > env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -443,14 +464,15 @@ exports[`env shebang with args > shim files > env.args.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -529,14 +551,15 @@ exports[`env shebang with default args > shim files > env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -615,14 +638,15 @@ exports[`env shebang with no NODE_PATH > shim files > env.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -701,14 +725,15 @@ exports[`explicit shebang > shim files > sh.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -787,14 +812,15 @@ exports[`explicit shebang with args > shim files > sh.args.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -873,14 +899,15 @@ exports[`explicit shebang with args, linking to another drive on Windows > shim 
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -959,14 +986,15 @@ exports[`explicit shebang with prog args > shim files > sh.args.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -1045,14 +1073,15 @@ exports[`no cmd file > shim files > exe.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -1098,14 +1127,15 @@ exports[`no shebang > shim files > exe.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
@@ -1158,14 +1188,15 @@ exports[`shebang with -S > shim files > from.env.s.shim 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then

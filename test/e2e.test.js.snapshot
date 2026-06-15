@@ -4,14 +4,15 @@ exports[`create a command shim for a .exe file > shim files 1`] = `
 basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
+msys=""
 
 case \`uname -a\` in
   *CYGWIN*|*MINGW*|*MSYS*)
     if command -v cygpath > /dev/null 2>&1; then
-      basedir=\`cygpath -w "$basedir"\`
-      basedir_win="$basedir"
+      basedir_win=\`cygpath -w "$basedir"\`
     fi
     exe=".exe"
+    msys="true"
   ;;
   *WSL2*)
     if command -v wslpath > /dev/null 2>&1; then
