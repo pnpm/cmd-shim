@@ -469,7 +469,16 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   let progArgs = opts.progArgs ? `${opts.progArgs.join(` `)} ` : ''
 
   // #!/bin/sh
-  // basedir=$(dirname "$(echo "$0" | sed -e 's,\\,/,g')")
+  // # Resolve $0 through symlinks so basedir is the shim's real directory.
+  // link="$0"
+  // while [ -L "$link" ]; do
+  //   target=$(readlink "$link")
+  //   case "$target" in
+  //     /*) link="$target" ;;
+  //     *)  link="$(dirname "$link")/$target" ;;
+  //   esac
+  // done
+  // basedir=$(dirname "$(echo "$link" | sed -e 's,\\,/,g')")
   // basedir_win="$basedir"
   // exe=""
   // msys=""
@@ -510,7 +519,16 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
 
   let sh = `\
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+link="$0"
+while [ -L "$link" ]; do
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""

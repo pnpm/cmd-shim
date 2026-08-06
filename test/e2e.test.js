@@ -108,3 +108,36 @@ describeOnPosix('sh shim uses POSIX runtime from PATH', () => {
     assert.doesNotMatch(r.stderr, /node\.exe/)
   })
 })
+
+describeOnPosix('sh shim invoked through a chain of external symlinks', () => {
+  // POSIX shells set $0 to the invoked symlink, not the shim it points at,
+  // so the shim must follow the chain before deriving basedir
+  // (https://github.com/pnpm/pnpm/issues/13405).
+  test('resolves basedir from the shim\'s real directory and runs the target', async () => {
+    const tempDir = tempy.directory()
+    const binDir = path.join(tempDir, 'node_modules', '.bin')
+    const targetDir = path.join(tempDir, 'node_modules', 'typescript', 'bin')
+    fs.mkdirSync(binDir, { recursive: true })
+    fs.mkdirSync(targetDir, { recursive: true })
+
+    const target = path.join(targetDir, 'tsc')
+    fs.writeFileSync(target, '#!/bin/sh\necho "tsc-output"\n', 'utf8')
+    fs.chmodSync(target, 0o755)
+
+    const shim = path.join(binDir, 'tsc')
+    await cmdShim(target, shim)
+
+    const hop1 = path.join(tempDir, 'symlink_hop_1')
+    const hop2 = path.join(tempDir, 'symlink_hop_2')
+    fs.symlinkSync(shim, hop1)
+    fs.symlinkSync(hop1, hop2)
+
+    const r = spawnSync(hop2, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+
+    assert.equal(r.status, 0, `shim exited ${r.status}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`)
+    assert.equal(r.stdout.trim(), 'tsc-output')
+  })
+})
