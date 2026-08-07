@@ -14,10 +14,8 @@ jobs:
         node-version: ['22', '24']
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/setup@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
-      - run: pnpm install
+          runtime: node@${{ matrix.node-version }}
+          cache: true
       - run: pnpm test
