@@ -113,8 +113,7 @@ describeOnPosix('sh shim invoked through a chain of external symlinks', () => {
   // POSIX shells set $0 to the invoked symlink, not the shim it points at,
   // so the shim must follow the chain before deriving basedir
   // (https://github.com/pnpm/pnpm/issues/13405).
-  test('resolves basedir from the shim\'s real directory and runs the target', async () => {
-    const tempDir = tempy.directory()
+  const makeShimmedTool = async (tempDir) => {
     const binDir = path.join(tempDir, 'node_modules', '.bin')
     const targetDir = path.join(tempDir, 'node_modules', 'typescript', 'bin')
     fs.mkdirSync(binDir, { recursive: true })
@@ -126,18 +125,74 @@ describeOnPosix('sh shim invoked through a chain of external symlinks', () => {
 
     const shim = path.join(binDir, 'tsc')
     await cmdShim(target, shim)
+    return shim
+  }
+
+  const runShim = (cmd) => {
+    const r = spawnSync(cmd, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    assert.equal(r.status, 0, `shim exited ${r.status}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`)
+    return r.stdout.trim()
+  }
+
+  test('follows a chain of absolute symlinks', async () => {
+    const tempDir = tempy.directory()
+    const shim = await makeShimmedTool(tempDir)
 
     const hop1 = path.join(tempDir, 'symlink_hop_1')
     const hop2 = path.join(tempDir, 'symlink_hop_2')
     fs.symlinkSync(shim, hop1)
     fs.symlinkSync(hop1, hop2)
 
-    const r = spawnSync(hop2, {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    })
+    assert.equal(runShim(hop2), 'tsc-output')
+  })
 
-    assert.equal(r.status, 0, `shim exited ${r.status}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`)
-    assert.equal(r.stdout.trim(), 'tsc-output')
+  test('follows relative symlinks from another directory', async () => {
+    const tempDir = tempy.directory()
+    await makeShimmedTool(tempDir)
+
+    // Both hops use relative targets, exercising the shim's
+    // dirname-composition branch rather than the absolute one.
+    const localBin = path.join(tempDir, 'usr', 'local', 'bin')
+    fs.mkdirSync(localBin, { recursive: true })
+    const hop1 = path.join(tempDir, 'usr', 'tsc')
+    fs.symlinkSync(path.join('..', 'node_modules', '.bin', 'tsc'), hop1)
+    const hop2 = path.join(localBin, 'tsc')
+    fs.symlinkSync(path.join('..', '..', 'tsc'), hop2)
+
+    assert.equal(runShim(hop2), 'tsc-output')
+  })
+
+  test('resolves symlinks when directories contain spaces', async () => {
+    const tempDir = path.join(tempy.directory(), 'dir with spaces')
+    fs.mkdirSync(tempDir, { recursive: true })
+    await makeShimmedTool(tempDir)
+
+    const hopDir = path.join(tempDir, 'link dir')
+    fs.mkdirSync(hopDir)
+    const hop = path.join(hopDir, 'tsc')
+    fs.symlinkSync(path.join('..', 'node_modules', '.bin', 'tsc'), hop)
+
+    assert.equal(runShim(hop), 'tsc-output')
+  })
+
+  test('runs a node-shebang bin through a symlink chain', async () => {
+    const tempDir = tempy.directory()
+    const binDir = path.join(tempDir, 'node_modules', '.bin')
+    const pkgDir = path.join(tempDir, 'node_modules', 'tool')
+    fs.mkdirSync(binDir, { recursive: true })
+    fs.mkdirSync(pkgDir, { recursive: true })
+
+    const target = path.join(pkgDir, 'cli.js')
+    fs.writeFileSync(target, '#!/usr/bin/env node\nconsole.log("NODE_BIN_OK")\n', 'utf8')
+    const shim = path.join(binDir, 'tool')
+    await cmdShim(target, shim, { createCmdFile: false })
+
+    const hop = path.join(tempDir, 'tool')
+    fs.symlinkSync(path.join('node_modules', '.bin', 'tool'), hop)
+
+    assert.equal(runShim(hop), 'NODE_BIN_OK')
   })
 })

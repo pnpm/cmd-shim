@@ -470,8 +470,11 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
 
   // #!/bin/sh
   // # Resolve $0 through symlinks so basedir is the shim's real directory.
+  // # Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
   // link="$0"
-  // while [ -L "$link" ]; do
+  // hops=0
+  // while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  //   hops=$((hops+1))
   //   target=$(readlink "$link")
   //   case "$target" in
   //     /*) link="$target" ;;
@@ -520,8 +523,11 @@ function generateShShim (src: string, to: string, opts: InternalOptions): string
   let sh = `\
 #!/bin/sh
 # Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
 link="$0"
-while [ -L "$link" ]; do
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
   target=$(readlink "$link")
   case "$target" in
     /*) link="$target" ;;
