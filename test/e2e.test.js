@@ -72,13 +72,15 @@ describeOnPosix('sh shim binstub uses exec', () => {
     const shim = path.join(tempDir, 'shim')
     await cmdShim(process.execPath, shim)
 
-    const proc = spawn('/bin/sh', [shim, '-p', 'process.pid'], {
+    const proc = spawn('/bin/sh', [shim, '-e', 'process.stdout.write(String(process.pid))'], {
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     const shimPid = proc.pid
     let stdout = ''
     proc.stdout.on('data', (chunk) => { stdout += chunk })
-    const exitCode = await new Promise((resolve) => proc.on('exit', resolve))
+    // `exit` may fire before the stdio streams have been drained. Wait for
+    // `close` so stdout contains the complete PID before asserting on it.
+    const exitCode = await new Promise((resolve) => proc.on('close', resolve))
 
     assert.equal(exitCode, 0, `shim exited ${exitCode}; stdout=${stdout}`)
     const reportedPid = Number(stdout.trim())
