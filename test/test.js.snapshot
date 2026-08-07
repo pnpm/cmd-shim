@@ -1,7 +1,19 @@
 exports[`batch script > shim files > bat.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -104,7 +116,19 @@ exit $ret
 exports[`custom node executable > shim files > env.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -165,7 +189,19 @@ exit $LASTEXITCODE
 exports[`env shebang > shim files > env.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -252,7 +288,19 @@ exit $ret
 exports[`env shebang with NODE_PATH > shim files > env.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -362,7 +410,19 @@ exit $ret
 exports[`env shebang with PATH extending > shim files > env.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -461,7 +521,19 @@ exit $ret
 exports[`env shebang with args > shim files > env.args.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -548,7 +620,19 @@ exit $ret
 exports[`env shebang with default args > shim files > env.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -635,7 +719,19 @@ exit $ret
 exports[`env shebang with no NODE_PATH > shim files > env.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -722,7 +818,19 @@ exit $ret
 exports[`explicit shebang > shim files > sh.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -809,7 +917,19 @@ exit $ret
 exports[`explicit shebang with args > shim files > sh.args.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -896,7 +1016,19 @@ exit $ret
 exports[`explicit shebang with args, linking to another drive on Windows > shim files > sh.args.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -983,7 +1115,19 @@ exit $ret
 exports[`explicit shebang with prog args > shim files > sh.args.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -1070,7 +1214,19 @@ exit $ret
 exports[`no cmd file > shim files > exe.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -1124,7 +1280,19 @@ exit $LASTEXITCODE
 exports[`no shebang > shim files > exe.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
@@ -1185,7 +1353,19 @@ exit $LASTEXITCODE
 exports[`shebang with -S > shim files > from.env.s.shim 1`] = `
 
 #!/bin/sh
-basedir=$(dirname "$(echo "$0" | sed -e 's,\\\\,/,g')")
+# Resolve $0 through symlinks so basedir is the shim's real directory.
+# Cap hops at the kernel's ELOOP limit so a cycle cannot hang the shim.
+link="$0"
+hops=0
+while [ -L "$link" ] && [ "$hops" -lt 40 ]; do
+  hops=$((hops+1))
+  target=$(readlink "$link")
+  case "$target" in
+    /*) link="$target" ;;
+    *)  link="$(dirname "$link")/$target" ;;
+  esac
+done
+basedir=$(dirname "$(echo "$link" | sed -e 's,\\\\,/,g')")
 basedir_win="$basedir"
 exe=""
 msys=""
