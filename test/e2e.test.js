@@ -209,6 +209,25 @@ describeOnPosix('sh shim resolves its helpers off the caller\'s PATH', () => {
     fs.chmodSync(file, 0o755)
   }
 
+  // A shimmed tool plus a relative symlink to it in the same directory, so the
+  // walk composes a directory with the link target instead of taking one
+  // straight from readlink.
+  const makeShimmedTool = async (tempDir) => {
+    const binDir = path.join(tempDir, 'node_modules', '.bin')
+    const target = path.join(tempDir, 'node_modules', 'typescript', 'bin', 'tsc.js')
+    fs.mkdirSync(binDir, { recursive: true })
+    fs.mkdirSync(path.dirname(target), { recursive: true })
+    fs.writeFileSync(target, 'console.log("tsc-output")\n', 'utf8')
+    // A dependency can declare a bin named node.exe, and the shim's basedir is
+    // the directory those bins land in. Only a lying uname reaches it.
+    writeExecutable(path.join(binDir, 'node.exe'), '#!/bin/sh\necho hijacked\n')
+
+    const shim = path.join(binDir, 'tsc')
+    await cmdShim(target, shim, { createCmdFile: false })
+    fs.symlinkSync('tsc', path.join(binDir, 'tsc-link'))
+    return binDir
+  }
+
   // Write the tree the decoys point at, and the decoys, returning the directory
   // to put at the front of PATH. Each decoy answers with what its real
   // counterpart would be asked for, so any one of them alone is enough to
@@ -232,26 +251,10 @@ describeOnPosix('sh shim resolves its helpers off the caller\'s PATH', () => {
     return decoyDir
   }
 
-  test('reaches its target with decoy readlink, dirname, sed, and uname first on PATH', async () => {
-    const tempDir = tempy.directory()
-    const binDir = path.join(tempDir, 'node_modules', '.bin')
-    const target = path.join(tempDir, 'node_modules', 'typescript', 'bin', 'tsc.js')
-    fs.mkdirSync(binDir, { recursive: true })
-    fs.mkdirSync(path.dirname(target), { recursive: true })
-    fs.writeFileSync(target, 'console.log("tsc-output")\n', 'utf8')
-    // A dependency can declare a bin named node.exe, and the shim's basedir is
-    // the directory those bins land in. Only a lying uname reaches it.
-    writeExecutable(path.join(binDir, 'node.exe'), '#!/bin/sh\necho hijacked\n')
-
-    const shim = path.join(binDir, 'tsc')
-    await cmdShim(target, shim, { createCmdFile: false })
-    // Relative and in the shim's own directory, so the walk composes a
-    // directory with the link target instead of taking one from readlink.
-    const link = path.join(binDir, 'tsc-link')
-    fs.symlinkSync('tsc', link)
-
+  const runWithDecoys = (tempDir, cmd, args, cwd) => {
     const decoyDir = plantHijackTreeAndDecoys(tempDir)
-    const r = spawnSync(link, {
+    const r = spawnSync(cmd, args, {
+      cwd,
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
@@ -259,8 +262,23 @@ describeOnPosix('sh shim resolves its helpers off the caller\'s PATH', () => {
         PATH: [decoyDir, path.dirname(process.execPath), process.env.PATH].join(path.delimiter),
       },
     })
-
     assert.equal(r.status, 0, `shim exited ${r.status}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`)
     assert.equal(r.stdout.trim(), 'tsc-output', 'the shim took a helper from the caller\'s PATH')
+  }
+
+  test('reaches its target with decoy readlink, dirname, sed, and uname first on PATH', async () => {
+    const tempDir = tempy.directory()
+    const binDir = await makeShimmedTool(tempDir)
+
+    runWithDecoys(tempDir, path.join(binDir, 'tsc-link'), [])
+  })
+
+  // The kernel and execvp hand the interpreter the path they resolved, so $0 is
+  // bare only when a shell is given the name itself.
+  test('reaches its target when sh receives a bare name', async () => {
+    const tempDir = tempy.directory()
+    const binDir = await makeShimmedTool(tempDir)
+
+    runWithDecoys(tempDir, 'sh', ['tsc-link'], binDir)
   })
 })
