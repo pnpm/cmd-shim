@@ -198,3 +198,69 @@ describeOnPosix('sh shim invoked through a chain of external symlinks', () => {
     assert.equal(runShim(hop), 'NODE_BIN_OK')
   })
 })
+
+describeOnPosix('sh shim resolves its helpers off the caller\'s PATH', () => {
+  // A shim runs with node_modules/.bin at the front of PATH, which is where a
+  // dependency's own bins live, so a helper taken from there could report any
+  // directory it liked and redirect what the shim finally execs
+  // (https://github.com/pnpm/pnpm/issues/14837).
+  const writeExecutable = (file, body) => {
+    fs.writeFileSync(file, body, 'utf8')
+    fs.chmodSync(file, 0o755)
+  }
+
+  // Write the tree the decoys point at, and the decoys, returning the directory
+  // to put at the front of PATH. Each decoy answers with what its real
+  // counterpart would be asked for, so any one of them alone is enough to
+  // redirect the shim.
+  const plantHijackTreeAndDecoys = (tempDir) => {
+    const hijack = path.join(tempDir, 'hijack', 'node_modules')
+    const hijackBin = path.join(hijack, '.bin')
+    const hijackTarget = path.join(hijack, 'typescript', 'bin', 'tsc.js')
+    fs.mkdirSync(hijackBin, { recursive: true })
+    fs.mkdirSync(path.dirname(hijackTarget), { recursive: true })
+    fs.writeFileSync(hijackTarget, 'console.log("hijacked")\n', 'utf8')
+
+    const decoyDir = path.join(tempDir, 'decoy')
+    fs.mkdirSync(decoyDir)
+    const answer = (p) => `#!/bin/sh\necho '${p}'\n`
+    for (const helper of ['readlink', 'sed']) {
+      writeExecutable(path.join(decoyDir, helper), answer(path.join(hijackBin, 'tsc')))
+    }
+    writeExecutable(path.join(decoyDir, 'dirname'), answer(hijackBin))
+    writeExecutable(path.join(decoyDir, 'uname'), '#!/bin/sh\necho MINGW64_NT-10.0\n')
+    return decoyDir
+  }
+
+  test('reaches its target with decoy readlink, dirname, sed, and uname first on PATH', async () => {
+    const tempDir = tempy.directory()
+    const binDir = path.join(tempDir, 'node_modules', '.bin')
+    const target = path.join(tempDir, 'node_modules', 'typescript', 'bin', 'tsc.js')
+    fs.mkdirSync(binDir, { recursive: true })
+    fs.mkdirSync(path.dirname(target), { recursive: true })
+    fs.writeFileSync(target, 'console.log("tsc-output")\n', 'utf8')
+    // A dependency can declare a bin named node.exe, and the shim's basedir is
+    // the directory those bins land in. Only a lying uname reaches it.
+    writeExecutable(path.join(binDir, 'node.exe'), '#!/bin/sh\necho hijacked\n')
+
+    const shim = path.join(binDir, 'tsc')
+    await cmdShim(target, shim, { createCmdFile: false })
+    // Relative and in the shim's own directory, so the walk composes a
+    // directory with the link target instead of taking one from readlink.
+    const link = path.join(binDir, 'tsc-link')
+    fs.symlinkSync('tsc', link)
+
+    const decoyDir = plantHijackTreeAndDecoys(tempDir)
+    const r = spawnSync(link, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: {
+        ...process.env,
+        PATH: [decoyDir, path.dirname(process.execPath), process.env.PATH].join(path.delimiter),
+      },
+    })
+
+    assert.equal(r.status, 0, `shim exited ${r.status}\nstdout: ${r.stdout}\nstderr: ${r.stderr}`)
+    assert.equal(r.stdout.trim(), 'tsc-output', 'the shim took a helper from the caller\'s PATH')
+  })
+})
