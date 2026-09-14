@@ -199,6 +199,35 @@ describeOnPosix('sh shim invoked through a chain of external symlinks', () => {
   })
 })
 
+describeOnPosix('sh shim basedir conversion does not interpret backslash escapes', () => {
+  // POSIX echo turns `\n` and `\t` into a newline and a tab, so a Windows-form
+  // `$0` such as `C:\node_modules\.bin\tsc` is corrupted before `sed` runs
+  // (https://github.com/pnpm/pnpm/issues/14867).
+  test('normalizes a Windows-form path without injecting a newline or tab', async () => {
+    const tempDir = tempy.directory()
+    const target = path.join(tempDir, 'tool.js')
+    fs.writeFileSync(target, '#!/usr/bin/env node\nconsole.log("ok")\n', 'utf8')
+    const shim = path.join(tempDir, 'tool')
+    await cmdShim(target, shim, { createCmdFile: false })
+
+    const content = fs.readFileSync(shim, 'utf8')
+    const conversion = content
+      .split('\n')
+      .find((line) => line.startsWith('basedir=$('))
+    assert.ok(conversion, 'header must assign basedir from the shim path')
+    assert.match(conversion, /printf '%s\\n' "\$link"/)
+    assert.doesNotMatch(conversion, /echo "\$link"/)
+
+    const script = `link='C:\\node_modules\\.bin\\tsc'\n${conversion}\nprintf '%s' "$basedir"`
+    const r = spawnSync('/bin/sh', ['-c', script], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    assert.equal(r.status, 0, `conversion exited ${r.status}\nstderr: ${r.stderr}`)
+    assert.equal(r.stdout, 'C:/node_modules/.bin/tsc')
+  })
+})
+
 describeOnPosix('sh shim resolves its helpers off the caller\'s PATH', () => {
   // A shim runs with node_modules/.bin at the front of PATH, which is where a
   // dependency's own bins live, so a helper taken from there could report any

@@ -282,3 +282,28 @@ describe('batch script', () => {
     await testFile(t, `${to}.ps1`)
   })
 })
+
+describe('posix shim header prints $link with printf', () => {
+  // POSIX echo processes `\n` / `\t` before sed can convert the backslashes
+  // (https://github.com/pnpm/pnpm/issues/14867).
+  const src = path.resolve(fixtures, 'src.env')
+  const to = path.resolve(fixtures, 'env.shim')
+  before(async () => {
+    await setupFixtures()
+    return cmdShim(src, to, { createCmdFile: false, fs })
+  })
+
+  test('generated sh shim pipes $link through printf, not echo', async () => {
+    const content = await fs.promises.readFile(to, 'utf8')
+    assert.equal(
+      content.includes(`basedir=$(printf '%s\\n' "$link" | command -p sed -e 's,\\\\,/,g')`),
+      true,
+      'header must print $link with printf so a Windows-form path keeps its backslashes'
+    )
+    assert.equal(
+      content.includes('basedir=$(echo "$link"'),
+      false,
+      'header must not pipe $link through echo'
+    )
+  })
+})
