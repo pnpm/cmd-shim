@@ -1,3 +1,6 @@
+> This package has been moved to https://github.com/pnpm/pnpm/tree/main/pnpm11/bins/cmd-shim
+
+
 # @zkochan/cmd-shim
 
 > Used in pnpm for command line application support
