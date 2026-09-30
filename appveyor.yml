@@ -1,0 +1,12 @@
+image: Visual Studio 2022
+environment:
+  nodejs_version: '22'
+install:
+  - ps: Install-Product node $env:nodejs_version x64
+  - npm i -g pnpm@12.4.1
+  - pnpm install --frozen-lockfile
+build: off
+test_script:
+  - node --version
+  - pnpm --version
+  - pnpm test
